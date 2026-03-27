@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codex Provider Switch</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <p class="eyebrow">Codex Provider Switch</p>
+          <h1>供应商切换器</h1>
+          <p class="subtle">
+            选择左侧预设后，直接编辑并保存 `config.toml` 与 `auth.json`，再决定是否启用到
+            Codex。
+          </p>
+        </div>
+
+        <div class="status-panel">
+          <div>
+            <span class="status-label">当前生效</span>
+            <strong id="active-provider-name">读取中...</strong>
+          </div>
+          <div class="status-grid">
+            <div>
+              <span class="status-label">模型</span>
+              <strong id="active-model">-</strong>
+            </div>
+            <div>
+              <span class="status-label">Key</span>
+              <strong id="active-key">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <div id="preset-list" class="preset-list"></div>
+      </aside>
+
+      <main class="workspace">
+        <section class="toolbar">
+          <div class="target-panel">
+            <p class="eyebrow">当前编辑目标</p>
+            <input
+              id="preset-name-input"
+              class="target-name-input"
+              type="text"
+              placeholder="输入供应商名称"
+            />
+            <textarea
+              id="preset-description-input"
+              class="target-description-input"
+              rows="2"
+              placeholder="输入供应商说明"
+            ></textarea>
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="reload-live-btn" class="secondary" type="button">读取当前文件</button>
+            <button id="test-btn" class="secondary" type="button">在线测试</button>
+            <button id="save-preset-btn" class="secondary" type="button">保存预设</button>
+            <button id="open-dir-btn" class="secondary" type="button">打开 .codex 目录</button>
+            <button id="apply-btn" class="primary" type="button">启用到 Codex</button>
+          </div>
+        </section>
+
+        <section class="paths-grid">
+          <article class="path-card">
+            <span class="status-label">config.toml</span>
+            <strong id="config-path">-</strong>
+          </article>
+          <article class="path-card">
+            <span class="status-label">auth.json</span>
+            <strong id="auth-path">-</strong>
+          </article>
+        </section>
+
+        <section class="editors">
+          <article class="editor-card">
+            <div class="editor-header">
+              <div>
+                <p class="eyebrow">config.toml</p>
+                <h3>配置文件</h3>
+              </div>
+              <span class="editor-tip">直接展示并编辑当前预设对应的 TOML 内容</span>
+            </div>
+            <textarea id="config-editor" spellcheck="false"></textarea>
+          </article>
+
+          <article class="editor-card">
+            <div class="editor-header">
+              <div>
+                <p class="eyebrow">auth.json</p>
+                <h3>鉴权文件</h3>
+              </div>
+              <span class="editor-tip">先保存预设，再按需启用到 Codex</span>
+            </div>
+            <textarea id="auth-editor" spellcheck="false"></textarea>
+          </article>
+        </section>
+
+        <section class="message-strip">
+          <span id="message-text">正在加载预设与当前配置...</span>
+        </section>
+
+        <section class="test-panel">
+          <div class="test-panel__header">
+            <p class="eyebrow">Connection Test</p>
+            <h3>在线测试结果</h3>
+          </div>
+          <div class="test-grid">
+            <div>
+              <span class="status-label">状态</span>
+              <strong id="test-status">未测试</strong>
+            </div>
+            <div>
+              <span class="status-label">接口</span>
+              <strong id="test-endpoint">-</strong>
+            </div>
+            <div>
+              <span class="status-label">模型</span>
+              <strong id="test-model">-</strong>
+            </div>
+            <div>
+              <span class="status-label">返回</span>
+              <strong id="test-response-id">-</strong>
+            </div>
+          </div>
+          <pre id="test-output" class="test-output">点击“在线测试”后，会用当前编辑器中的 config.toml 和 auth.json 发起最小请求。</pre>
+        </section>
+      </main>
+    </div>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
