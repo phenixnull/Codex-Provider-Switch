@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Electron desktop app for switching Codex provider presets and editing ~/.codex credentials.",
   "author": "Administrator",
+  "license": "MIT",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",

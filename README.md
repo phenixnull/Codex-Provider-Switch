@@ -9,6 +9,7 @@
     <img src="https://img.shields.io/badge/Node.js-Desktop_App-1F9D55?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js desktop app" />
     <img src="https://img.shields.io/badge/Providers-92scw%20%7C%20GMN%20%7C%20Gwen%20%7C%20OpenAI-FF7A59?style=for-the-badge" alt="Built-in providers" />
     <img src="https://img.shields.io/badge/Tests-25%20passing-0F766E?style=for-the-badge" alt="25 passing tests" />
+    <img src="https://img.shields.io/badge/License-MIT-111827?style=for-the-badge" alt="MIT License" />
   </p>
 </div>
 
@@ -112,6 +113,18 @@ npm install
 npm start
 ```
 
+如果你只是想下次直接启动项目，不想每次手动切目录，可以直接双击根目录下的：
+
+```bat
+start-codex-provider-switch.bat
+```
+
+这个脚本会：
+
+- 自动切到项目根目录
+- 如果缺少 `node_modules`，先执行 `npm install`
+- 然后执行 `npm start` 启动 Electron 应用
+
 默认会打开 Electron 桌面应用，并读取：
 
 - `%USERPROFILE%\\.codex\\config.toml`
@@ -161,6 +174,10 @@ npm run dist
 - 多环境配置分组
 - 更完整的测试诊断日志
 - 发布可下载的便携版发行页
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE).
 
 ---
 
