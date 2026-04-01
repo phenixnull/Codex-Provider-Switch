@@ -36,3 +36,30 @@ test('official OpenAI preset uses the official openai provider id', () => {
   assert.match(preset.configText, /model = "gpt-5\.4"/);
   assert.match(preset.authText, /OPENAI_API_KEY/);
 });
+
+test('darwin presets omit Windows-specific config fields', () => {
+  assert.equal(typeof presetsModule.getPresetById, 'function');
+
+  const scwPreset = presetsModule.getPresetById('92scw', 'darwin');
+  const gmnPreset = presetsModule.getPresetById('gmn', 'darwin');
+  const openAiPreset = presetsModule.getPresetById('openai', 'darwin');
+
+  assert.equal(scwPreset.configText.includes('windows_wsl_setup_acknowledged'), false);
+  assert.equal(scwPreset.configText.includes('[windows]'), false);
+  assert.equal(gmnPreset.configText.includes('windows_wsl_setup_acknowledged'), false);
+  assert.equal(gmnPreset.configText.includes('elevated_windows_sandbox'), false);
+  assert.equal(openAiPreset.configText.includes('windows_wsl_setup_acknowledged'), false);
+});
+
+test('win32 presets keep Windows-specific config fields', () => {
+  assert.equal(typeof presetsModule.getPresetById, 'function');
+
+  const scwPreset = presetsModule.getPresetById('92scw', 'win32');
+  const gmnPreset = presetsModule.getPresetById('gmn', 'win32');
+  const openAiPreset = presetsModule.getPresetById('openai', 'win32');
+
+  assert.equal(scwPreset.configText.includes('windows_wsl_setup_acknowledged = true'), true);
+  assert.equal(scwPreset.configText.includes('[windows]'), true);
+  assert.equal(gmnPreset.configText.includes('elevated_windows_sandbox = true'), true);
+  assert.equal(openAiPreset.configText.includes('windows_wsl_setup_acknowledged = true'), true);
+});

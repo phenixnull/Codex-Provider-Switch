@@ -22,6 +22,16 @@ test('getCodexPaths builds the expected Windows-style codex file paths', () => {
   assert.equal(paths.authPath, 'C:\\Users\\Administrator\\.codex\\auth.json');
 });
 
+test('getCodexPaths builds the expected POSIX-style codex file paths', () => {
+  assert.equal(typeof fileStore.getCodexPaths, 'function');
+
+  const paths = fileStore.getCodexPaths('/Users/example');
+
+  assert.equal(paths.codexDir, '/Users/example/.codex');
+  assert.equal(paths.configPath, '/Users/example/.codex/config.toml');
+  assert.equal(paths.authPath, '/Users/example/.codex/auth.json');
+});
+
 test('saveCodexFiles creates the codex directory and writes both files', async () => {
   assert.equal(typeof fileStore.saveCodexFiles, 'function');
   const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-provider-switch-'));

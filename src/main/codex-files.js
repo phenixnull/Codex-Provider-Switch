@@ -5,13 +5,18 @@ const TOML = require('@iarna/toml');
 
 const { resolveAuthJsonForSave, summarizeCurrentState } = require('../shared/config-service');
 
+function getPathApi(homeDir) {
+  return String(homeDir || '').includes('\\') ? path.win32 : path.posix;
+}
+
 function getCodexPaths(homeDir = os.homedir()) {
-  const codexDir = path.join(homeDir, '.codex');
+  const pathApi = getPathApi(homeDir);
+  const codexDir = pathApi.join(homeDir, '.codex');
 
   return {
     codexDir,
-    configPath: path.join(codexDir, 'config.toml'),
-    authPath: path.join(codexDir, 'auth.json')
+    configPath: pathApi.join(codexDir, 'config.toml'),
+    authPath: pathApi.join(codexDir, 'auth.json')
   };
 }
 
