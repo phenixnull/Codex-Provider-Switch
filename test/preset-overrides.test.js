@@ -60,6 +60,37 @@ test('mergePresetsWithOverrides applies saved name and description overrides to 
   assert.equal(merged[0].configText, 'override-config');
 });
 
+test('mergePresetsWithOverrides ignores legacy mojibake descriptions for built-in presets', () => {
+  assert.equal(typeof overridesStore.mergePresetsWithOverrides, 'function');
+
+  const merged = overridesStore.mergePresetsWithOverrides(
+    [
+      {
+        id: 'openai',
+        name: 'OpenAI Official',
+        description: '官方 OpenAI 直连配置，使用内置 openai provider。',
+        configText: 'base-config',
+        authText: 'base-auth'
+      }
+    ],
+    {
+      overrides: {
+        openai: {
+          description:
+            '\u7039\u6a3b\u67df\u0020\u004f\u0070\u0065\u006e\u0041\u0049\u0020\u9429\u78cb\u7e5b\u95b0\u5d87\u7586\u951b\u5c7c\u5a07\u9422\u3125\u5534\u7f03\u003f\u006f\u0070\u0065\u006e\u0061\u0069\u0020\u0070\u0072\u006f\u0076\u0069\u0064\u0065\u0072\u9286\u003f',
+          configText: 'override-config',
+          authText: 'override-auth'
+        }
+      },
+      customPresets: []
+    }
+  );
+
+  assert.equal(merged[0].description, '官方 OpenAI 直连配置，使用内置 openai provider。');
+  assert.equal(merged[0].configText, 'override-config');
+  assert.equal(merged[0].authText, 'override-auth');
+});
+
 test('savePresetOverride persists the preset override payload on disk', async () => {
   assert.equal(typeof overridesStore.savePresetOverride, 'function');
   assert.equal(typeof overridesStore.readPresetOverrides, 'function');

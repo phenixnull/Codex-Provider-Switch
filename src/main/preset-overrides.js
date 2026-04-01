@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { sanitizePresetAuthTextForStorage } = require('../shared/config-service');
+const { isLegacyPresetDescription } = require('../shared/presets');
 
 function getPresetOverrideStorePath(userDataDir) {
   return path.join(userDataDir, 'preset-overrides.json');
@@ -150,7 +151,10 @@ function mergePresetsWithOverrides(presets, storeOrOverrides) {
     return {
       ...preset,
       name: override.name || preset.name,
-      description: override.description || preset.description,
+      description:
+        override.description && !isLegacyPresetDescription(preset.id, override.description)
+          ? override.description
+          : preset.description,
       configText: override.configText,
       authText: override.authText
     };

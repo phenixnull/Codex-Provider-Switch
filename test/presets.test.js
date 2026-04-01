@@ -37,6 +37,31 @@ test('official OpenAI preset uses the official openai provider id', () => {
   assert.match(preset.authText, /OPENAI_API_KEY/);
 });
 
+test('built-in preset descriptions stay human-readable', () => {
+  assert.equal(typeof presetsModule.listPresets, 'function');
+
+  const descriptions = Object.fromEntries(
+    presetsModule.listPresets().map((preset) => [preset.id, preset.description])
+  );
+
+  assert.equal(
+    descriptions['92scw'],
+    '92scw 代理，使用 codex provider 和 sk 开头的默认密钥。'
+  );
+  assert.equal(
+    descriptions.gmn,
+    'GMN 代理，使用 codex provider 和后台生成的 sk 密钥。'
+  );
+  assert.equal(
+    descriptions.gwen,
+    'Gwen 代理，provider 为 gwen，默认使用 cr_ 开头密钥。'
+  );
+  assert.equal(
+    descriptions.openai,
+    '官方 OpenAI 直连配置，使用内置 openai provider。'
+  );
+});
+
 test('darwin presets omit Windows-specific config fields', () => {
   assert.equal(typeof presetsModule.getPresetById, 'function');
 

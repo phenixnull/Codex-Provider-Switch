@@ -2,8 +2,34 @@ function buildConfigText(lines) {
   return `${lines.join('\n')}\n`;
 }
 
+const BUILT_IN_PRESET_DESCRIPTIONS = {
+  '92scw': '92scw 代理，使用 codex provider 和 sk 开头的默认密钥。',
+  gmn: 'GMN 代理，使用 codex provider 和后台生成的 sk 密钥。',
+  gwen: 'Gwen 代理，provider 为 gwen，默认使用 cr_ 开头密钥。',
+  openai: '官方 OpenAI 直连配置，使用内置 openai provider。'
+};
+
+const LEGACY_MOJIBAKE_PRESET_DESCRIPTIONS = {
+  '92scw':
+    '\u0039\u0032\u0073\u0063\u0077\u0020\u6d60\uff47\u608a\u951b\u5c7c\u5a07\u9422\u003f\u0063\u006f\u0064\u0065\u0078\u0020\u0070\u0072\u006f\u0076\u0069\u0064\u0065\u0072\u0020\u935c\u003f\u0073\u006b\u0020\u5bee\u20ac\u6fb6\u5bf8\u6b91\u699b\u6a3f\ue17b\u7035\u55db\u631c\u9286\u003f',
+  gmn:
+    '\u0047\u004d\u004e\u0020\u6d60\uff47\u608a\u951b\u5c7c\u5a07\u9422\u003f\u0063\u006f\u0064\u0065\u0078\u0020\u0070\u0072\u006f\u0076\u0069\u0064\u0065\u0072\u0020\u935c\u5c7d\u6097\u9359\u626e\u6553\u93b4\u612e\u6b91\u0020\u0073\u006b\u0020\u7035\u55db\u631c\u9286\u003f',
+  gwen:
+    '\u0047\u0077\u0065\u006e\u0020\u6d60\uff47\u608a\u951b\u5bb2\u0072\u006f\u0076\u0069\u0064\u0065\u0072\u0020\u6d93\u003f\u0067\u0077\u0065\u006e\u951b\u5c84\u7caf\u7481\u3084\u5a07\u9422\u003f\u0063\u0072\u005f\u0020\u5bee\u20ac\u6fb6\u6751\u7611\u95bd\u30e3\u20ac\u003f',
+  openai:
+    '\u7039\u6a3b\u67df\u0020\u004f\u0070\u0065\u006e\u0041\u0049\u0020\u9429\u78cb\u7e5b\u95b0\u5d87\u7586\u951b\u5c7c\u5a07\u9422\u3125\u5534\u7f03\u003f\u006f\u0070\u0065\u006e\u0061\u0069\u0020\u0070\u0072\u006f\u0076\u0069\u0064\u0065\u0072\u9286\u003f'
+};
+
 function isWindowsPlatform(platform = process.platform) {
   return platform === 'win32';
+}
+
+function getBuiltInPresetDescription(id) {
+  return BUILT_IN_PRESET_DESCRIPTIONS[id] || '';
+}
+
+function isLegacyPresetDescription(id, description) {
+  return String(description || '').trim() === LEGACY_MOJIBAKE_PRESET_DESCRIPTIONS[id];
 }
 
 function build92scwConfigText(platform) {
@@ -157,7 +183,7 @@ function buildPresetDefinitions(platform = process.platform) {
     {
       id: '92scw',
       name: '92scw',
-      description: '92scw 浠ｇ悊锛屼娇鐢?codex provider 鍜?sk 寮€澶寸殑榛樿瀵嗛挜銆?',
+      description: getBuiltInPresetDescription('92scw'),
       configText: build92scwConfigText(platform),
       authText: `{
   "OPENAI_API_KEY": "sk-demo-92scw-provider-key-0001"
@@ -167,7 +193,7 @@ function buildPresetDefinitions(platform = process.platform) {
     {
       id: 'gmn',
       name: 'GMN',
-      description: 'GMN 浠ｇ悊锛屼娇鐢?codex provider 鍜屽悗鍙扮敓鎴愮殑 sk 瀵嗛挜銆?',
+      description: getBuiltInPresetDescription('gmn'),
       configText: buildGmnConfigText(platform),
       authText: `{
   "OPENAI_API_KEY": "sk-demo-gmn-provider-key-0001"
@@ -177,7 +203,7 @@ function buildPresetDefinitions(platform = process.platform) {
     {
       id: 'gwen',
       name: 'Gwen',
-      description: 'Gwen 浠ｇ悊锛宲rovider 涓?gwen锛岄粯璁や娇鐢?cr_ 寮€澶村瘑閽ャ€?',
+      description: getBuiltInPresetDescription('gwen'),
       configText: buildGwenConfigText(),
       authText: `{
   "OPENAI_API_KEY": "cr-demo-gwen-provider-key-0001"
@@ -187,7 +213,7 @@ function buildPresetDefinitions(platform = process.platform) {
     {
       id: 'openai',
       name: 'OpenAI Official',
-      description: '瀹樻柟 OpenAI 鐩磋繛閰嶇疆锛屼娇鐢ㄥ唴缃?openai provider銆?',
+      description: getBuiltInPresetDescription('openai'),
       configText: buildOpenAiConfigText(platform),
       authText: `{
   "OPENAI_API_KEY": "sk-your-openai-api-key"
@@ -218,6 +244,8 @@ function getPresetById(id, platform = process.platform) {
 }
 
 module.exports = {
+  getBuiltInPresetDescription,
   getPresetById,
+  isLegacyPresetDescription,
   listPresets
 };
