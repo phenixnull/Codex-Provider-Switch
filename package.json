@@ -1,14 +1,18 @@
 {
   "name": "codex-provider-switch",
   "version": "1.0.0",
-  "description": "Electron desktop app for switching Codex provider presets and editing ~/.codex credentials.",
+  "description": "Electron desktop app for switching Codex provider presets and editing ~/.codex credentials on Windows and macOS.",
   "author": "Administrator",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
     "test": "node --test",
     "build": "electron-builder --dir",
-    "dist": "electron-builder"
+    "build:win": "electron-builder --dir --win",
+    "build:mac": "electron-builder --dir --mac",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
   },
   "build": {
     "appId": "com.codex.providerswitch",
@@ -24,6 +28,13 @@
       "target": [
         "portable"
       ]
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools"
     }
   },
   "dependencies": {
