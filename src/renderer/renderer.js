@@ -57,6 +57,13 @@ function qs(selector) {
   return document.querySelector(selector);
 }
 
+function applyPlatformTheme() {
+  const platform = window.codexApp?.platform || 'unknown';
+  document.documentElement.dataset.platform = platform;
+  document.body.dataset.platform = platform;
+  document.body.classList.add(`platform-${platform}`);
+}
+
 function buildRendererError(result) {
   const error = new Error(result?.error?.message || 'Unknown IPC error');
   Object.assign(error, result?.error || {});
@@ -827,6 +834,8 @@ function bindEditorEvents() {
 }
 
 async function bootstrap() {
+  applyPlatformTheme();
+
   Object.assign(elements, {
     activeKey: qs('#active-key'),
     activeModel: qs('#active-model'),

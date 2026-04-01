@@ -25,6 +25,32 @@
   --radius-xl: 16px;
   --radius-lg: 12px;
   --radius-md: 10px;
+  --font-heading: Poppins, "Avenir Next", "Segoe UI", Arial, "Microsoft YaHei UI", sans-serif;
+  --font-body: Lora, Georgia, "PingFang SC", "Microsoft YaHei UI", serif;
+  --font-code: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+  --heading-tracking: -0.02em;
+  --shell-sidebar-width: clamp(308px, 24vw, 372px);
+  --shell-padding-x: clamp(16px, 1.5vw, 24px);
+  --shell-padding-y: clamp(16px, 1.4vw, 22px);
+  --panel-padding: clamp(14px, 1vw, 18px);
+  --panel-gap: clamp(12px, 1vw, 16px);
+  --toolbar-action-width: 152px;
+  --control-height: 46px;
+  --content-max-width: 1760px;
+}
+
+html[data-platform='darwin'] {
+  --font-heading: Poppins, "Avenir Next", "SF Pro Display", Arial, sans-serif;
+  --font-body: Lora, Georgia, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", serif;
+  --font-code: "SFMono-Regular", Menlo, "Cascadia Code", Consolas, "Courier New", monospace;
+  --shell-sidebar-width: clamp(320px, 25vw, 388px);
+  --panel-padding: clamp(15px, 1.1vw, 20px);
+  --toolbar-action-width: 160px;
+  --control-height: 48px;
+}
+
+html[data-platform='win32'] {
+  --font-heading: Poppins, "Segoe UI", Arial, "Microsoft YaHei UI", sans-serif;
 }
 
 * {
@@ -38,7 +64,8 @@ body {
 
 body {
   margin: 0;
-  font-family: Lora, Georgia, "Microsoft YaHei UI", "PingFang SC", serif;
+  overflow: hidden;
+  font-family: var(--font-body);
   color: var(--text);
   background: #faf9f5;
 }
@@ -77,15 +104,19 @@ textarea {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 348px 1fr;
+  grid-template-columns: minmax(296px, var(--shell-sidebar-width)) minmax(0, 1fr);
   height: 100vh;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
   overflow: hidden;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  padding: 22px 18px 0;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--shell-padding-y) var(--shell-padding-x) 0;
   border-right: 1px solid var(--line);
   background: rgba(232, 230, 220, 0.35);
   backdrop-filter: blur(18px);
@@ -110,6 +141,7 @@ textarea {
 .editor-card,
 .message-strip,
 .test-panel {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-xl);
   background: var(--surface);
@@ -123,7 +155,7 @@ textarea {
 
 .sidebar-header {
   flex-shrink: 0;
-  padding: 18px;
+  padding: var(--panel-padding);
 }
 
 .sidebar-header h1,
@@ -131,17 +163,17 @@ textarea {
 .editor-header h3,
 .test-panel__header h3 {
   margin: 6px 0 0;
-  font-family: Poppins, Arial, "Microsoft YaHei UI", sans-serif;
-  letter-spacing: -0.02em;
+  font-family: var(--font-heading);
+  letter-spacing: var(--heading-tracking);
 }
 
 .sidebar-header h1 {
-  font-size: 34px;
+  font-size: clamp(30px, 2vw, 34px);
   line-height: 1;
 }
 
 .toolbar h2 {
-  font-size: 28px;
+  font-size: clamp(24px, 1.8vw, 28px);
   line-height: 1;
 }
 
@@ -172,7 +204,7 @@ textarea {
 .status-panel {
   flex-shrink: 0;
   margin-top: 16px;
-  padding: 18px;
+  padding: var(--panel-padding);
 }
 
 .status-grid {
@@ -312,7 +344,7 @@ textarea {
   gap: 12px;
   flex: 1 1 0;
   margin-top: 18px;
-  padding-bottom: 26px;
+  padding-bottom: 18px;
   padding-right: 4px;
   overflow-y: auto;
   min-height: 0;
@@ -399,17 +431,20 @@ textarea {
 
 .preset-card__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
 .preset-card__title {
   display: block;
-  font-family: Poppins, Arial, "Microsoft YaHei UI", sans-serif;
-  font-size: 26px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-heading);
+  font-size: clamp(23px, 1.5vw, 26px);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--heading-tracking);
 }
 
 .preset-card__chip {
@@ -533,10 +568,10 @@ textarea {
 
 .preset-card__metric-value {
   display: block;
-  font-family: Poppins, Arial, "Microsoft YaHei UI", sans-serif;
+  font-family: var(--font-heading);
   font-size: 24px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--heading-tracking);
 }
 
 .preset-card__gmn-progress {
@@ -563,10 +598,10 @@ textarea {
 
 .preset-card__gmn-progress-text {
   display: block;
-  font-family: Poppins, Arial, "Microsoft YaHei UI", sans-serif;
+  font-family: var(--font-heading);
   font-size: 22px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--heading-tracking);
 }
 
 .preset-card__gmn-progress-detail {
@@ -629,9 +664,11 @@ textarea {
 
 .workspace {
   display: grid;
-  grid-template-rows: auto auto auto minmax(200px, 1fr);
-  gap: 12px;
-  padding: 16px 22px;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--panel-gap);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--shell-padding-y) var(--shell-padding-x);
   overflow-y: auto;
 }
 
@@ -639,22 +676,32 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px 18px;
+  padding: var(--panel-padding);
   background: var(--surface-strong);
 }
 
 .toolbar-top {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 42%);
   gap: 16px;
-  align-items: flex-start;
+  align-items: start;
 }
 
 .toolbar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--toolbar-action-width), 1fr));
   gap: 10px;
+  align-self: start;
+  min-width: 0;
+}
+
+.target-panel,
+.path-card,
+.editor-card,
+.message-strip,
+.test-panel,
+.toolbar-test {
+  min-width: 0;
 }
 
 .target-name-input,
@@ -671,10 +718,10 @@ textarea {
   padding: 0;
   border: 0;
   background: transparent;
-  font-family: Poppins, Arial, "Microsoft YaHei UI", sans-serif;
-  font-size: 28px;
+  font-family: var(--font-heading);
+  font-size: clamp(26px, 1.8vw, 28px);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--heading-tracking);
   line-height: 1.05;
 }
 
@@ -698,10 +745,16 @@ textarea {
 
 button.primary,
 button.secondary {
-  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  min-width: 0;
   padding: 0 16px;
   border-radius: 16px;
   border: 1px solid transparent;
+  font-family: var(--font-heading);
+  font-size: 14px;
   cursor: pointer;
   transition:
     transform 160ms ease,
@@ -730,12 +783,12 @@ button.secondary {
 
 .paths-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--panel-gap);
 }
 
 .path-card {
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: var(--surface-strong);
 }
 
@@ -748,7 +801,7 @@ button.secondary {
 
 .editors {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   min-height: 0;
   overflow: hidden;
@@ -765,6 +818,7 @@ button.secondary {
 
 .editor-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
@@ -772,7 +826,7 @@ button.secondary {
 }
 
 .editor-tip {
-  max-width: 240px;
+  max-width: min(280px, 100%);
   color: var(--muted);
   line-height: 1.55;
   text-align: right;
@@ -788,7 +842,7 @@ textarea {
   background: #faf9f5;
   color: var(--text);
   resize: none;
-  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-family: var(--font-code);
   font-size: 13px;
   line-height: 1.68;
   overflow-y: auto;
@@ -833,7 +887,7 @@ textarea:focus {
 
 .test-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
   align-items: start;
 }
@@ -863,7 +917,7 @@ textarea:focus {
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-family: var(--font-code);
   font-size: 13px;
   line-height: 1.58;
 }
@@ -905,21 +959,21 @@ textarea:focus {
   }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1440px) {
   .app-shell {
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: minmax(292px, 332px) minmax(0, 1fr);
   }
 
   .toolbar-top {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .toolbar-actions {
-    justify-content: flex-start;
+    grid-template-columns: repeat(auto-fit, minmax(144px, 1fr));
   }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1180px) {
   .app-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
@@ -927,15 +981,30 @@ textarea:focus {
   }
 
   .sidebar {
-    max-height: 40vh;
+    max-height: 42vh;
     border-right: 0;
     border-bottom: 1px solid var(--line);
     padding-bottom: 0;
   }
 
+  .workspace {
+    padding-top: 14px;
+  }
+
+  .editors {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .toolbar-actions,
   .paths-grid,
-  .editors,
   .test-grid {
     grid-template-columns: 1fr;
+  }
+
+  .editor-tip {
+    max-width: none;
+    text-align: left;
   }
 }

@@ -25,6 +25,7 @@ const {
 const { fetchGwenKeyOverview } = require('./gwen-usage');
 const { fetchNewApiTokenOverview } = require('./newapi-token-usage');
 const { fetchOpenAiUsageOverview } = require('./openai-usage');
+const { getWindowOptions } = require('./window-options');
 const { extractApiKey } = require('../shared/config-service');
 const { listPresets } = require('../shared/presets');
 
@@ -141,19 +142,7 @@ async function buildOpenAiProviderUsage(live) {
 }
 
 function createWindow() {
-  const window = new BrowserWindow({
-    width: 1560,
-    height: 980,
-    minWidth: 1180,
-    minHeight: 760,
-    autoHideMenuBar: true,
-    backgroundColor: '#0e1c1e',
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      preload: path.join(__dirname, '../preload/preload.js')
-    }
-  });
+  const window = new BrowserWindow(getWindowOptions());
 
   window.loadFile(path.join(__dirname, '../renderer/index.html'));
 }

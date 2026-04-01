@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('codexApp', {
+  platform: process.platform,
   refresh92scw: () => ipcRenderer.invoke('app:92scw-refresh'),
   bootstrap: () => ipcRenderer.invoke('app:bootstrap'),
   createCustomPreset: (payload) => ipcRenderer.invoke('app:create-custom-preset', payload),
