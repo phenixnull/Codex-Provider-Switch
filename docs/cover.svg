@@ -32,9 +32,12 @@
   <rect x="110" y="118" width="164" height="44" rx="22" fill="#E0F2FE"/>
   <text x="192" y="146" text-anchor="middle" fill="#0369A1" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Electron App</text>
 
-  <text x="110" y="238" fill="#0F172A" font-size="64" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Codex Provider Switch</text>
-  <text x="110" y="286" fill="#475569" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="500">Preset-driven config manager for config.toml + auth.json</text>
-  <text x="110" y="330" fill="#64748B" font-size="24" font-family="Segoe UI, Arial, sans-serif">View, edit, save, test, and apply multi-provider Codex setups with a friendlier workflow.</text>
+  <text x="110" y="236" fill="#0F172A" font-size="58" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Codex Provider Switch</text>
+  <text x="110" y="282" fill="#475569" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="500">Preset-driven config manager for config.toml + auth.json</text>
+  <text fill="#64748B" font-size="21" font-family="Segoe UI, Arial, sans-serif">
+    <tspan x="110" y="324">View, edit, save, test, and apply multi-provider Codex setups</tspan>
+    <tspan x="110" y="352">with a friendlier workflow.</tspan>
+  </text>
 
   <rect x="110" y="382" width="188" height="70" rx="24" fill="url(#accentA)"/>
   <text x="204" y="416" text-anchor="middle" fill="#FFFFFF" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Save Preset</text>
@@ -48,7 +51,7 @@
   <text x="658" y="416" text-anchor="middle" fill="#FFFFFF" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Online Test</text>
   <text x="658" y="438" text-anchor="middle" fill="#FDF2F8" font-size="16" font-family="Segoe UI, Arial, sans-serif">Responses API check</text>
 
-  <g transform="translate(850 112)">
+  <g transform="translate(872 112)">
     <rect width="338" height="318" rx="28" fill="#0F172A"/>
     <rect x="22" y="22" width="294" height="46" rx="16" fill="#1E293B"/>
     <text x="42" y="51" fill="#E2E8F0" font-size="20" font-family="Consolas, Menlo, monospace">Current built-in presets</text>
