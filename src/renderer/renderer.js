@@ -598,7 +598,7 @@ async function loadLiveFilesIntoEditors() {
   renderPaths();
   renderTestResult(null, 'neutral');
   setMessage('Loaded the current live config files.', 'success');
-  await refreshAllProviderUsage({ silent: true });
+  void refreshAllProviderUsage({ silent: true });
 }
 
 async function saveCurrentEditors() {
@@ -619,8 +619,8 @@ async function saveCurrentEditors() {
     renderPresetList();
     renderLiveSummary();
     renderPaths();
-    await refreshAllProviderUsage({ silent: true });
     setMessage('Config files were written and activated.', 'success');
+    void refreshAllProviderUsage({ silent: true });
   } catch (error) {
     setMessage(`Failed to activate config: ${error.message}`, 'error');
   }
@@ -736,9 +736,7 @@ async function refreshProviderUsage(providerId, { silent = false } = {}) {
 }
 
 async function refreshAllProviderUsage(options = {}) {
-  for (const providerId of USAGE_PROVIDER_IDS) {
-    await refreshProviderUsage(providerId, options);
-  }
+  await Promise.all(USAGE_PROVIDER_IDS.map((providerId) => refreshProviderUsage(providerId, options)));
 }
 
 function buildPresetPayloadForSave() {
@@ -791,7 +789,7 @@ async function saveCurrentPreset() {
       setMessage(`Saved new preset: ${payload.name}.`, 'success');
 
       if (isUsageProviderId(result.preset?.id)) {
-        await refreshProviderUsage(result.preset.id, { silent: true });
+        void refreshProviderUsage(result.preset.id, { silent: true });
       }
 
       return;
@@ -805,7 +803,7 @@ async function saveCurrentPreset() {
     setMessage(`Preset saved: ${payload.name}.`, 'success');
 
     if (isUsageProviderId(payload.id)) {
-      await refreshProviderUsage(payload.id, { silent: true });
+      void refreshProviderUsage(payload.id, { silent: true });
     }
   } catch (error) {
     setMessage(`Failed to save preset: ${error.message}`, 'error');
@@ -876,10 +874,10 @@ async function bootstrap() {
       openai: providerUsage.openai || null
     };
     state.providerBusy = {
-      '92scw': false,
-      gmn: false,
-      gwen: false,
-      openai: false
+      '92scw': true,
+      gmn: true,
+      gwen: true,
+      openai: true
     };
 
     const liveProviderId = bootstrapPayload.live?.summary?.providerId;
@@ -903,6 +901,7 @@ async function bootstrap() {
     renderPaths();
     renderTestResult(null, 'neutral');
     setMessage('Presets and current config loaded.', 'success');
+    void refreshAllProviderUsage({ silent: true });
   } catch (error) {
     setMessage(`Bootstrap failed: ${error.message}`, 'error');
   }

@@ -25,6 +25,7 @@ const {
 const { fetchGwenKeyOverview } = require('./gwen-usage');
 const { fetchNewApiTokenOverview } = require('./newapi-token-usage');
 const { fetchOpenAiUsageOverview } = require('./openai-usage');
+const { buildBootstrapPayload } = require('./bootstrap-payload');
 const { getWindowOptions } = require('./window-options');
 const { extractApiKey } = require('../shared/config-service');
 const { listPresets } = require('../shared/presets');
@@ -147,31 +148,16 @@ function createWindow() {
   window.loadFile(path.join(__dirname, '../renderer/index.html'));
 }
 
-async function buildBootstrapPayload() {
-  const { presets, presetStore } = await readMergedPresets();
-  const live = await readCodexFiles();
-  const scw92 = await build92scwProviderUsage(presets);
-  const gmn = await buildGmnProviderUsage(presets);
-  const gwen = await buildGwenProviderUsage(presets);
-  const openai = await buildOpenAiProviderUsage(live);
-
-  return {
-    paths: getCodexPaths(),
-    presets,
-    presetOrder: presetStore.presetOrder || [],
-    live,
-    gmn,
-    providerUsage: {
-      '92scw': scw92,
-      gmn,
-      gwen,
-      openai
-    }
-  };
-}
-
 function bindIpc() {
-  ipcMain.handle('app:bootstrap', async () => runIpcTask(() => buildBootstrapPayload()));
+  ipcMain.handle('app:bootstrap', async () =>
+    runIpcTask(() =>
+      buildBootstrapPayload({
+        readMergedPresets,
+        readLiveFiles: readCodexFiles,
+        getCodexPaths
+      })
+    )
+  );
   ipcMain.handle('app:read-live-files', async () => runIpcTask(() => readCodexFiles()));
   ipcMain.handle('app:get-preset', async (_event, presetId) =>
     runIpcTask(async () => {
