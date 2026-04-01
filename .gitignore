@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+npm-debug.log*
+auth.json
+.codex/
+gmn-session.json
+.env
+.env.*
+*.pem
+*.p12
