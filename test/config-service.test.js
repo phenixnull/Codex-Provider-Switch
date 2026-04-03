@@ -50,6 +50,18 @@ approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 `;
 
+const configQuan2Go = `
+model_provider = "OpenAI"
+model = "gpt-5.4"
+review_model = "gpt-5.4"
+
+[model_providers.OpenAI]
+name = "OpenAI"
+base_url = "https://capi.quan2go.com/openai"
+wire_api = "responses"
+requires_openai_auth = true
+`;
+
 const existingConfigWithProjects = `
 model_provider = "codex"
 model = "gpt-5.4"
@@ -92,6 +104,11 @@ test('detectActiveProviderId identifies the Gwen preset', () => {
 test('detectActiveProviderId identifies the official OpenAI preset', () => {
   assert.equal(typeof service.detectActiveProviderId, 'function');
   assert.equal(service.detectActiveProviderId(configOpenAi), 'openai');
+});
+
+test('detectActiveProviderId identifies the Quan2Go relay preset by base URL', () => {
+  assert.equal(typeof service.detectActiveProviderId, 'function');
+  assert.equal(service.detectActiveProviderId(configQuan2Go), 'quan2go');
 });
 
 test('mergePresetWithExistingConfig preserves existing trusted projects', () => {

@@ -177,6 +177,40 @@
     });
   }
 
+  function buildDailyUsagePresetCardModel(keyOverview, fallbackMaskedKey = '') {
+    const usedPercent = round(keyOverview?.usedPercent);
+    const usedText = formatUsd(round(keyOverview?.usedQuota));
+    const totalText = formatUsd(round(keyOverview?.totalQuota));
+    const detailParts = [`${usedPercent.toFixed(2)}% used`];
+    const dayScoreDate = String(keyOverview?.dayScoreDate || '').trim();
+
+    if (dayScoreDate) {
+      detailParts.push(dayScoreDate);
+    }
+
+    const progressItem = buildPresetProgressItem({
+      labelText: 'Today Used',
+      progressPercent: usedPercent,
+      progressText: `${usedText} / ${totalText}`,
+      progressDetailText: detailParts.join(' · '),
+      progressGradient: buildProgressGradient(100 - usedPercent)
+    });
+    const rawStatus = typeof keyOverview?.status === 'string' ? keyOverview.status.trim() : '';
+
+    return {
+      keyText: keyOverview?.maskedKey || fallbackMaskedKey || 'Unavailable',
+      remainingText: usedText,
+      totalText,
+      progressLabelText: progressItem.labelText,
+      progressPercent: progressItem.percent,
+      progressText: progressItem.text,
+      progressDetailText: progressItem.detailText,
+      progressGradient: progressItem.gradient,
+      progressItems: [progressItem],
+      statusText: rawStatus ? rawStatus.toUpperCase() : 'ACTIVE'
+    };
+  }
+
   function buildOpenAiUsagePresetCardModel(keyOverview) {
     const primaryItem = buildRateLimitProgressItem(
       {
@@ -263,17 +297,48 @@
     };
   }
 
+  function buildQuan2GoUnavailablePresetCardModel() {
+    const progressItem = buildPresetProgressItem({
+      labelText: 'Today Used',
+      progressPercent: 0,
+      progressText: '-',
+      progressDetailText: 'Enter the activation code to read daily usage.',
+      progressGradient: buildProgressGradient(0)
+    });
+
+    return {
+      keyText: 'Activation code required',
+      remainingText: '-',
+      totalText: '-',
+      progressLabelText: progressItem.labelText,
+      progressPercent: progressItem.percent,
+      progressText: progressItem.text,
+      progressDetailText: progressItem.detailText,
+      progressGradient: progressItem.gradient,
+      progressItems: [progressItem],
+      statusText: 'ENTER CODE'
+    };
+  }
+
   function buildGmnPresetCardModel(keyOverview, fallbackMaskedKey = '') {
     return buildUsagePresetCardModel(keyOverview, fallbackMaskedKey);
   }
 
   function buildUsagePresetCardModel(keyOverview, fallbackMaskedKey = '', options = {}) {
+    if (keyOverview?.usageKind === 'daily_usage_quota') {
+      return buildDailyUsagePresetCardModel(keyOverview, fallbackMaskedKey);
+    }
+
     if (keyOverview?.usageKind === 'chatgpt_rate_limit') {
       return buildOpenAiUsagePresetCardModel(keyOverview);
     }
 
     if (options.providerId === 'openai' && !keyOverview) {
       return buildOpenAiUnavailablePresetCardModel();
+    }
+
+    if (options.providerId === 'quan2go' && !keyOverview) {
+      return buildQuan2GoUnavailablePresetCardModel();
     }
 
     const quotaModel = buildGmnQuotaCardModel(keyOverview);

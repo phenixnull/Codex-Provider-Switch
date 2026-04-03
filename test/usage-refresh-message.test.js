@@ -49,3 +49,18 @@ test('buildUsageRefreshResultMessage keeps the standard success wording for othe
     tone: 'success'
   });
 });
+
+test('buildUsageRefreshResultMessage uses the Quan2Go provider label', () => {
+  assert.equal(typeof usageRefreshMessage.buildUsageRefreshResultMessage, 'function');
+
+  const message = usageRefreshMessage.buildUsageRefreshResultMessage('quan2go', {
+    keyOverview: {
+      usageKind: 'daily_usage_quota'
+    }
+  });
+
+  assert.deepEqual(message, {
+    text: 'Quan2Go quota refreshed.',
+    tone: 'success'
+  });
+});

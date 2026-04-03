@@ -169,3 +169,33 @@ test('buildUsagePresetCardModel formats the official 5-hour ChatGPT window for O
   assert.equal(model.progressItems[2].labelText, 'Review 7d Left');
   assert.equal(model.progressItems[2].text, '100.00% left');
 });
+
+test('buildUsagePresetCardModel formats daily used and total quota for Quan2Go cards', () => {
+  assert.equal(typeof gmnDisplay.buildUsagePresetCardModel, 'function');
+
+  const model = gmnDisplay.buildUsagePresetCardModel(
+    {
+      usageKind: 'daily_usage_quota',
+      maskedKey: 'C54C7BA...F0A3',
+      status: 'active',
+      totalQuota: 90,
+      usedQuota: 3.56,
+      remainingQuota: 86.44,
+      usedPercent: 3.96,
+      dayScoreDate: '2026-04-03'
+    },
+    'C54C7BA...F0A3',
+    {
+      providerId: 'quan2go'
+    }
+  );
+
+  assert.equal(model.keyText, 'C54C7BA...F0A3');
+  assert.equal(model.progressLabelText, 'Today Used');
+  assert.equal(model.progressText, '$3.56 / $90.00');
+  assert.equal(model.progressDetailText, '3.96% used · 2026-04-03');
+  assert.equal(model.statusText, 'ACTIVE');
+  assert.equal(Array.isArray(model.progressItems), true);
+  assert.equal(model.progressItems.length, 1);
+  assert.equal(model.progressItems[0].percent, 3.96);
+});

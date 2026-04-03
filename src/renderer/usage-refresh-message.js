@@ -11,7 +11,8 @@
     '92scw': '92scw',
     gmn: 'GMN',
     gwen: 'GWEN',
-    openai: 'Official'
+    openai: 'Official',
+    quan2go: 'Quan2Go'
   };
 
   function getUsageProviderLabel(providerId) {

@@ -20,6 +20,9 @@ test('createInitialProviderUsage returns empty quota placeholders for all provid
     },
     openai: {
       keyOverview: null
+    },
+    quan2go: {
+      keyOverview: null
     }
   });
 });

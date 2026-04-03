@@ -40,6 +40,19 @@ test('buildProviderTestRequest falls back to official OpenAI endpoint for openai
   assert.equal(request.body.model, 'gpt-5.4');
 });
 
+test('buildProviderTestRequest builds the relay responses endpoint for Quan2Go', () => {
+  assert.equal(typeof providerTester.buildProviderTestRequest, 'function');
+
+  const preset = getPresetById('quan2go');
+  const request = providerTester.buildProviderTestRequest({
+    configText: preset.configText,
+    authText: preset.authText
+  });
+
+  assert.equal(request.endpoint, 'https://capi.quan2go.com/openai/responses');
+  assert.equal(request.body.model, 'gpt-5.4');
+});
+
 test('testProviderConnection returns output_text on success', async () => {
   assert.equal(typeof providerTester.testProviderConnection, 'function');
 

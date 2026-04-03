@@ -41,6 +41,10 @@ function detectActiveProviderId(configText) {
     return 'gmn';
   }
 
+  if (baseUrl.includes('capi.quan2go.com')) {
+    return 'quan2go';
+  }
+
   return 'custom';
 }
 

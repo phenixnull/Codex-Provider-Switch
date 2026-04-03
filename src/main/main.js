@@ -25,10 +25,15 @@ const {
 const { fetchGwenKeyOverview } = require('./gwen-usage');
 const { fetchNewApiTokenOverview } = require('./newapi-token-usage');
 const { fetchOpenAiUsageOverview } = require('./openai-usage');
+const { fetchQuan2GoUsageOverview } = require('./quan2go-usage');
+const { setupLiveReload } = require('./live-reload');
 const { buildBootstrapPayload } = require('./bootstrap-payload');
 const { getWindowOptions } = require('./window-options');
 const { extractApiKey } = require('../shared/config-service');
 const { listPresets } = require('../shared/presets');
+
+let mainWindow = null;
+let stopLiveReload = null;
 
 function getGmnSessionStorePath() {
   return path.join(app.getPath('userData'), 'gmn-session.json');
@@ -142,10 +147,53 @@ async function buildOpenAiProviderUsage(live) {
   }
 }
 
+async function buildQuan2GoProviderUsage(presets) {
+  const apiKey = getPresetApiKey(presets, 'quan2go');
+
+  if (!apiKey) {
+    return {
+      keyOverview: null
+    };
+  }
+
+  try {
+    return {
+      keyOverview: await fetchQuan2GoUsageOverview(apiKey)
+    };
+  } catch {
+    return {
+      keyOverview: null
+    };
+  }
+}
+
 function createWindow() {
+  if (stopLiveReload) {
+    stopLiveReload();
+    stopLiveReload = null;
+  }
+
   const window = new BrowserWindow(getWindowOptions());
+  mainWindow = window;
 
   window.loadFile(path.join(__dirname, '../renderer/index.html'));
+
+  if (!app.isPackaged) {
+    stopLiveReload = setupLiveReload(window, {
+      appPath: app.getAppPath()
+    });
+  }
+
+  window.on('closed', () => {
+    if (mainWindow === window) {
+      mainWindow = null;
+    }
+
+    if (stopLiveReload) {
+      stopLiveReload();
+      stopLiveReload = null;
+    }
+  });
 }
 
 function bindIpc() {
@@ -236,6 +284,9 @@ function bindIpc() {
   );
   ipcMain.handle('app:openai-refresh', async () =>
     runIpcTask(async () => buildOpenAiProviderUsage(await readCodexFiles()))
+  );
+  ipcMain.handle('app:quan2go-refresh', async () =>
+    runIpcTask(async () => buildQuan2GoProviderUsage((await readMergedPresets()).presets))
   );
   ipcMain.handle('app:gmn-logout', async () =>
     runIpcTask(async () => {

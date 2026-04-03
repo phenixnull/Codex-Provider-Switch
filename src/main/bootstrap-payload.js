@@ -13,6 +13,9 @@ function createInitialProviderUsage() {
     },
     openai: {
       keyOverview: null
+    },
+    quan2go: {
+      keyOverview: null
     }
   };
 }

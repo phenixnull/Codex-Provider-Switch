@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('codexApp', {
   gwenRefresh: () => ipcRenderer.invoke('app:gwen-refresh'),
   openaiRefresh: () => ipcRenderer.invoke('app:openai-refresh'),
   openCodexDir: () => ipcRenderer.invoke('app:open-codex-dir'),
+  quan2goRefresh: () => ipcRenderer.invoke('app:quan2go-refresh'),
   readLiveFiles: () => ipcRenderer.invoke('app:read-live-files'),
   savePreset: (payload) => ipcRenderer.invoke('app:save-preset', payload),
   savePresetOrder: (order) => ipcRenderer.invoke('app:save-preset-order', order),

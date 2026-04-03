@@ -1,5 +1,5 @@
 const NEW_PRESET_ID = '__new__';
-const USAGE_PROVIDER_IDS = ['92scw', 'gmn', 'gwen', 'openai'];
+const USAGE_PROVIDER_IDS = ['92scw', 'gmn', 'gwen', 'openai', 'quan2go'];
 const usageRefreshMessage = globalThis.usageRefreshMessage || {};
 const openAiAuth = globalThis.openAiAuth || {};
 
@@ -15,13 +15,15 @@ const state = {
     '92scw': false,
     gmn: false,
     gwen: false,
-    openai: false
+    openai: false,
+    quan2go: false
   },
   providerUsage: {
     '92scw': null,
     gmn: null,
     gwen: null,
-    openai: null
+    openai: null,
+    quan2go: null
   }
 };
 
@@ -694,6 +696,10 @@ async function invokeUsageRefresh(providerId) {
     return window.codexApp.openaiRefresh();
   }
 
+  if (providerId === 'quan2go') {
+    return window.codexApp.quan2goRefresh();
+  }
+
   throw new Error(`Unsupported usage provider: ${providerId}`);
 }
 
@@ -871,13 +877,15 @@ async function bootstrap() {
       '92scw': providerUsage['92scw'] || null,
       gmn: providerUsage.gmn || bootstrapPayload.gmn || null,
       gwen: providerUsage.gwen || null,
-      openai: providerUsage.openai || null
+      openai: providerUsage.openai || null,
+      quan2go: providerUsage.quan2go || null
     };
     state.providerBusy = {
       '92scw': true,
       gmn: true,
       gwen: true,
-      openai: true
+      openai: true,
+      quan2go: true
     };
 
     const liveProviderId = bootstrapPayload.live?.summary?.providerId;

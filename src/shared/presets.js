@@ -3,10 +3,11 @@ function buildConfigText(lines) {
 }
 
 const BUILT_IN_PRESET_DESCRIPTIONS = {
-  '92scw': '92scw 代理，使用 codex provider 和 sk 开头的默认密钥。',
-  gmn: 'GMN 代理，使用 codex provider 和后台生成的 sk 密钥。',
-  gwen: 'Gwen 代理，provider 为 gwen，默认使用 cr_ 开头密钥。',
-  openai: '官方 OpenAI 直连配置，使用内置 openai provider。'
+  '92scw': '92scw relay preset with codex provider and sk key auth.',
+  gmn: 'GMN relay preset with codex provider and GMN-issued sk keys.',
+  gwen: 'Gwen relay preset with the gwen provider and cr_ activation keys.',
+  openai: 'Official OpenAI direct preset using the built-in openai provider.',
+  quan2go: 'Quan2Go relay preset with activation-code auth.'
 };
 
 const LEGACY_MOJIBAKE_PRESET_DESCRIPTIONS = {
@@ -178,6 +179,22 @@ function buildOpenAiConfigText(platform) {
   return buildConfigText(lines);
 }
 
+function buildQuan2GoConfigText() {
+  return buildConfigText([
+    'model_provider = "quan2go"',
+    'model = "gpt-5.4"',
+    'review_model = "gpt-5.4"',
+    'model_reasoning_effort = "xhigh"',
+    'disable_response_storage = true',
+    '',
+    '[model_providers.quan2go]',
+    'name = "Quan2Go"',
+    'base_url = "https://capi.quan2go.com/openai"',
+    'wire_api = "responses"',
+    'requires_openai_auth = true'
+  ]);
+}
+
 function buildPresetDefinitions(platform = process.platform) {
   return [
     {
@@ -217,6 +234,16 @@ function buildPresetDefinitions(platform = process.platform) {
       configText: buildOpenAiConfigText(platform),
       authText: `{
   "OPENAI_API_KEY": "sk-your-openai-api-key"
+}
+`
+    },
+    {
+      id: 'quan2go',
+      name: 'Quan2Go',
+      description: getBuiltInPresetDescription('quan2go'),
+      configText: buildQuan2GoConfigText(),
+      authText: `{
+  "OPENAI_API_KEY": "replace-with-activation-code"
 }
 `
     }
