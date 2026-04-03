@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const DEMO_ACTIVATION_CODE = 'C54C7BA9-0BC8-43C2-A125-2351C95FF0A3';
+const DEMO_ACTIVATION_CODE = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
 
 let quan2goUsage = {};
 
@@ -30,7 +30,7 @@ test('buildQuan2GoUsageOverview converts the card login payload into daily quota
     DEMO_ACTIVATION_CODE
   );
 
-  assert.equal(overview.maskedKey, 'C54C7BA...F0A3');
+  assert.equal(overview.maskedKey, 'xxxxxxx...xxxx');
   assert.equal(overview.usageKind, 'daily_usage_quota');
   assert.equal(overview.status, 'active');
   assert.equal(overview.userId, 70950);
@@ -115,7 +115,7 @@ test('fetchQuan2GoUsageOverview logs in with the activation code and refreshes w
     ]
   );
   assert.equal(calls[0].method, 'POST');
-  assert.match(calls[0].body, /"card":"C54C7BA9-0BC8-43C2-A125-2351C95FF0A3"/);
+  assert.match(calls[0].body, /"card":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/);
   assert.equal(calls[1].headers['x-auth-token'], 'user:70950/example-token');
   assert.equal(overview.usedQuota, 4.13);
   assert.equal(overview.totalQuota, 90);
