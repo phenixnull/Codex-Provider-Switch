@@ -10,6 +10,12 @@
     <img src="https://img.shields.io/badge/Products-Codex%20%7C%20Claude-FF7A59?style=for-the-badge" alt="Supported products" />
     <img src="https://img.shields.io/badge/Tests-108%20passing-0F766E?style=for-the-badge" alt="108 passing tests" />
   </p>
+
+  <p>
+    <img src="./docs/readme-ui-screenshot.png" alt="Claude preset workspace screenshot" width="100%" />
+  </p>
+
+  <p><sub>README 展示图已脱敏，真实 provider key 仅保存在本地预设覆盖文件中。</sub></p>
 </div>
 
 ## 更新日志

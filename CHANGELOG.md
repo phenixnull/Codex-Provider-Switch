@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
 - Added BigModel local auth storage plus official usage fetching for `每5小时使用额度` and `MCP 每月额度`, rendered directly inside the GLM-5.1 Claude card.
 - Added the OpenRouter Claude preset path for `qwen/qwen3.6-plus:free` with a simplified free-tier card that shows the fixed daily limit copy and animation-only refresh behavior.
 - Added new tests for BigModel auth/web usage, Claude file/config helpers, OpenRouter usage handling, product catalog separation, and usage-stat links.
+- Added a redacted live UI screenshot to the GitHub README hero section so the repo landing page shows the current Claude workspace.
 
 ### Changed
 
