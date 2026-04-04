@@ -66,24 +66,24 @@
     <text x="26" y="102" fill="#C67853" font-size="12" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="1.6">CURRENT PRESET SURFACES</text>
 
     <rect x="18" y="118" width="148" height="82" rx="22" fill="#EAF5FF" stroke="#C9E1F5"/>
-    <text x="36" y="152" fill="#145A8D" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="800">92scw</text>
+    <text x="36" y="152" fill="#145A8D" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="800">92scw</text>
     <text x="36" y="176" fill="#53758E" font-size="15" font-family="Segoe UI, Arial, sans-serif">codex / responses</text>
 
     <rect x="184" y="118" width="148" height="82" rx="22" fill="#FFF0E6" stroke="#F0D4C2"/>
-    <text x="202" y="152" fill="#9C4B1F" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="800">GMN</text>
+    <text x="202" y="152" fill="#9C4B1F" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="800">GMN</text>
     <text x="202" y="176" fill="#8E6A53" font-size="15" font-family="Segoe UI, Arial, sans-serif">codex / responses</text>
 
     <rect x="18" y="218" width="148" height="82" rx="22" fill="#EEF4FF" stroke="#D8E0F1"/>
-    <text x="36" y="252" fill="#385F97" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="800">GLM-5.1</text>
+    <text x="36" y="252" fill="#385F97" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="800">GLM-5.1</text>
     <text x="36" y="276" fill="#6C7A8D" font-size="15" font-family="Segoe UI, Arial, sans-serif">claude / bigmodel</text>
 
     <rect x="184" y="218" width="148" height="82" rx="22" fill="#F7EEFF" stroke="#E5D4F5"/>
-    <text x="202" y="252" fill="#7B43A8" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="800">OpenRouter</text>
+    <text x="202" y="252" fill="#7B43A8" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="800">OpenRouter</text>
     <text x="202" y="276" fill="#7B6A90" font-size="15" font-family="Segoe UI, Arial, sans-serif">claude / custom</text>
 
     <rect x="18" y="318" width="314" height="20" rx="10" fill="#E5DED6"/>
     <rect x="18" y="318" width="214" height="20" rx="10" fill="url(#accentD)"/>
-    <text x="246" y="333" fill="#7B7A72" font-size="13" font-family="Segoe UI, Arial, sans-serif">usage + apply + preset flow</text>
+    <text x="224" y="332" fill="#7B7A72" font-size="12" font-family="Segoe UI, Arial, sans-serif">usage + apply + presets</text>
   </g>
 
   <text x="110" y="532" fill="#94A3B8" font-size="18" font-family="Segoe UI, Arial, sans-serif">Desktop utility for managing Codex relays and Claude Code presets without hand-editing user-level files every time.</text>

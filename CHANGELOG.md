@@ -15,6 +15,7 @@ All notable changes to this project are documented in this file.
 - Added full README coverage for Claude Code, including product positioning, file boundaries, preset tables, workflow notes, and runtime/test coverage.
 - Added a refreshed README cover illustration that brands the app as a Codex plus Claude Code preset switch instead of the old Codex-only hero art.
 - Tuned the README cover preview card to use the app's lighter Claude/Codex visual language instead of the earlier dark, less coordinated mockup.
+- Tightened SVG cover typography so preview labels such as `OpenRouter` and the footer hint no longer overflow in GitHub's renderer.
 
 ### Changed
 
