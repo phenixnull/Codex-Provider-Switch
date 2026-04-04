@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./docs/cover.svg" alt="Codex Provider Switch cover" width="100%" />
-  <h1>Codex Provider Switch</h1>
+  <h1>CC Provider Switch (Codex/Claude Code)</h1>
   <p><strong>一个面向 Codex / Claude Code 双工作流的 Electron 预设切换器（Windows / macOS）</strong></p>
   <p>把 <code>.codex/config.toml</code> / <code>auth.json</code> 以及 <code>~/.claude/settings.json</code> / <code>.claude.json patch</code> 的切换、编辑、保存、启用与额度查看，收束到一个更友好的桌面界面里。</p>
 

@@ -16,6 +16,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- Renamed the README hero title to `CC Provider Switch (Codex/Claude Code)` so the landing page branding matches the dual-product scope.
 - Changed the startup preset ordering so the currently active Claude preset is pinned to the top by matching the live Claude base URL and model.
 - Expanded renderer/main/preload wiring so Claude usage cards, preset save flows, and live bootstrap data share the same app shell as Codex presets.
 - Preserved the repo-wide secret boundary: tracked files keep placeholders only, while real Claude/OpenRouter credentials stay in local override storage.
