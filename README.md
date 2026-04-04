@@ -7,10 +7,14 @@
   <p>
     <img src="https://img.shields.io/badge/Electron-41.1.0-191970?style=for-the-badge&logo=electron&logoColor=white" alt="Electron 41.1.0" />
     <img src="https://img.shields.io/badge/Node.js-Desktop_App-1F9D55?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js desktop app" />
-    <img src="https://img.shields.io/badge/Providers-92scw%20%7C%20GMN%20%7C%20Gwen%20%7C%20OpenAI-FF7A59?style=for-the-badge" alt="Built-in providers" />
-    <img src="https://img.shields.io/badge/Tests-57%20passing-0F766E?style=for-the-badge" alt="57 passing tests" />
+    <img src="https://img.shields.io/badge/Products-Codex%20%7C%20Claude-FF7A59?style=for-the-badge" alt="Supported products" />
+    <img src="https://img.shields.io/badge/Tests-108%20passing-0F766E?style=for-the-badge" alt="108 passing tests" />
   </p>
 </div>
+
+## 更新日志
+
+最新变更记录见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ## 项目定位
 
@@ -29,14 +33,14 @@
 
 | 能力 | 说明 |
 | --- | --- |
-| 内置默认预设 | 保留 `92scw`、`GMN`、`Gwen`、`OpenAI Official` 四套默认预设 |
+| 内置默认预设 | 保留 `92scw`、`GMN`、`Gwen`、`OpenAI Official`，并新增 Claude 侧 `GLM-5.1` 预设 |
 | 双文件编辑 | 同时展示并编辑 `config.toml` 和 `auth.json` |
 | 保存与启用分离 | `保存预设` 只保存到应用预设库，`启用到 Codex` 才会写入用户真实生效文件 |
 | 在线测试 | 直接对当前编辑中的配置发起最小 `/responses` 请求，返回状态、接口地址、响应 id 和文本 |
 | 自定义预设 | 支持新增自定义预设，名称和描述都可编辑 |
 | 现有预设可编辑 | 包括内置预设，也支持修改名称、描述、配置内容和密钥后再保存 |
 | 目标文件可追踪 | 清楚展示当前生效文件路径，方便你确认真正写到了哪里 |
-| 使用量面板 | 内置 provider 卡片可直接查看 92scw、GMN、Gwen、OpenAI 的当前额度信息 |
+| 使用量面板 | 内置卡片可直接查看 92scw、GMN、Gwen、OpenAI，以及 Claude GLM-5.1 的当前额度信息 |
 | Windows 兼容回退 | 针对部分网关拦截 Node/Electron `fetch` 的场景，在线测试可在 Windows 下自动回退到 PowerShell 请求 |
 
 ## 当前工作流
