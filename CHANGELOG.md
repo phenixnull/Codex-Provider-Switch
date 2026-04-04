@@ -13,6 +13,7 @@ All notable changes to this project are documented in this file.
 - Added new tests for BigModel auth/web usage, Claude file/config helpers, OpenRouter usage handling, product catalog separation, and usage-stat links.
 - Added a redacted live UI screenshot to the GitHub README hero section so the repo landing page shows the current Claude workspace.
 - Added full README coverage for Claude Code, including product positioning, file boundaries, preset tables, workflow notes, and runtime/test coverage.
+- Added a refreshed README cover illustration that brands the app as a Codex plus Claude Code preset switch instead of the old Codex-only hero art.
 
 ### Changed
 
