@@ -21,10 +21,12 @@
       "output": "dist"
     },
     "files": [
+      "assets/**/*",
       "src/**/*",
       "package.json"
     ],
     "win": {
+      "icon": "assets/codex-provider-switch.ico",
       "target": [
         "portable"
       ]

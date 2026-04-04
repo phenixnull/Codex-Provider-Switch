@@ -48,6 +48,11 @@ const { listPresetsByProduct } = require('../shared/presets');
 
 let mainWindow = null;
 let stopLiveReload = null;
+const WINDOWS_APP_USER_MODEL_ID = 'com.codex.providerswitch';
+
+if (process.platform === 'win32') {
+  app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
+}
 
 function getGmnSessionStorePath() {
   return path.join(app.getPath('userData'), 'gmn-session.json');
