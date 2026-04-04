@@ -12,6 +12,7 @@ All notable changes to this project are documented in this file.
 - Added the OpenRouter Claude preset path for `qwen/qwen3.6-plus:free` with a simplified free-tier card that shows the fixed daily limit copy and animation-only refresh behavior.
 - Added new tests for BigModel auth/web usage, Claude file/config helpers, OpenRouter usage handling, product catalog separation, and usage-stat links.
 - Added a redacted live UI screenshot to the GitHub README hero section so the repo landing page shows the current Claude workspace.
+- Added full README coverage for Claude Code, including product positioning, file boundaries, preset tables, workflow notes, and runtime/test coverage.
 
 ### Changed
 
