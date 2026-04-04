@@ -23,6 +23,18 @@
     return `$${value.toFixed(2)}`;
   }
 
+  function formatCount(value) {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) {
+      return '-';
+    }
+
+    return numericValue.toLocaleString('en-US', {
+      maximumFractionDigits: Number.isInteger(numericValue) ? 0 : 2
+    });
+  }
+
   function buildProgressGradient(progressPercent) {
     const percent = clamp(Number(progressPercent) || 0, 0, 100);
     const baseHue = Math.round((percent / 100) * 120);
@@ -320,6 +332,49 @@
     };
   }
 
+  function buildOpenRouterFreeEstimatePresetCardModel(keyOverview, fallbackMaskedKey = '') {
+    const dailyLimit = Math.max(0, Number(keyOverview?.dailyLimit) || 0);
+    const estimatedUsedCount = Math.max(0, Number(keyOverview?.estimatedUsedCount) || 0);
+    const estimatedRemainingCount = Math.max(0, Number(keyOverview?.estimatedRemainingCount) || 0);
+    const progressPercent = clamp(Number(keyOverview?.progressPercent) || 0, 0, 100);
+    const detailParts = [
+      `本地今日 ${formatCount(estimatedUsedCount)} / ${formatCount(dailyLimit)} 次`
+    ];
+
+    if (typeof keyOverview?.totalCredits === 'number' && Number.isFinite(keyOverview.totalCredits)) {
+      detailParts.push(`credits ${formatCount(keyOverview.totalCredits)}`);
+    }
+
+    if (typeof keyOverview?.totalUsage === 'number' && Number.isFinite(keyOverview.totalUsage)) {
+      detailParts.push(`usage ${formatCount(keyOverview.totalUsage)}`);
+    }
+
+    if (typeof keyOverview?.todayModelTokens === 'number' && Number.isFinite(keyOverview.todayModelTokens) && keyOverview.todayModelTokens > 0) {
+      detailParts.push(`tokens ${formatCount(keyOverview.todayModelTokens)}`);
+    }
+
+    const progressItem = buildPresetProgressItem({
+      labelText: 'Daily Free Left',
+      progressPercent,
+      progressText: `${formatCount(estimatedRemainingCount)} 次剩余`,
+      progressDetailText: detailParts.join(' · '),
+      progressGradient: buildProgressGradient(progressPercent)
+    });
+
+    return {
+      keyText: keyOverview?.maskedKey || fallbackMaskedKey || 'OpenRouter',
+      remainingText: formatCount(estimatedRemainingCount),
+      totalText: formatCount(dailyLimit),
+      progressLabelText: progressItem.labelText,
+      progressPercent: progressItem.percent,
+      progressText: progressItem.text,
+      progressDetailText: progressItem.detailText,
+      progressGradient: progressItem.gradient,
+      progressItems: [progressItem],
+      statusText: 'ESTIMATE'
+    };
+  }
+
   function buildGmnPresetCardModel(keyOverview, fallbackMaskedKey = '') {
     return buildUsagePresetCardModel(keyOverview, fallbackMaskedKey);
   }
@@ -331,6 +386,10 @@
 
     if (keyOverview?.usageKind === 'chatgpt_rate_limit') {
       return buildOpenAiUsagePresetCardModel(keyOverview);
+    }
+
+    if (keyOverview?.usageKind === 'openrouter_free_daily_estimate') {
+      return buildOpenRouterFreeEstimatePresetCardModel(keyOverview, fallbackMaskedKey);
     }
 
     if (options.providerId === 'openai' && !keyOverview) {

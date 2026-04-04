@@ -127,6 +127,7 @@ test('saveCustomPreset persists a custom preset and merge appends it to the pres
   await overridesStore.saveCustomPreset(
     {
       id: 'custom-demo',
+      productId: 'codex',
       name: 'Custom Demo',
       description: 'user added preset',
       configText: 'model_provider = "codex"\nmodel = "gpt-5.4"\n',
@@ -146,6 +147,50 @@ test('saveCustomPreset persists a custom preset and merge appends it to the pres
   assert.equal(merged.length, 2);
   assert.equal(merged[1].id, 'custom-demo');
   assert.equal(merged[1].isBuiltIn, false);
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('saveCustomPreset keeps Claude custom presets scoped away from Codex preset merges', async () => {
+  assert.equal(typeof overridesStore.saveCustomPreset, 'function');
+  assert.equal(typeof overridesStore.readPresetStore, 'function');
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'codex-provider-overrides-'));
+  const storePath = path.join(tempDir, 'preset-overrides.json');
+
+  await overridesStore.saveCustomPreset(
+    {
+      id: 'claude-custom',
+      productId: 'claude',
+      name: 'Claude Custom',
+      description: 'user added Claude preset',
+      configText: '{\n  "env": {}\n}\n',
+      authText: '{\n  "hasCompletedOnboarding": true\n}\n'
+    },
+    storePath
+  );
+
+  const store = await overridesStore.readPresetStore(storePath);
+  const mergedCodex = overridesStore.mergePresetsWithOverrides(
+    [{ id: 'gmn', productId: 'codex', name: 'GMN', configText: 'a', authText: 'b', isBuiltIn: true }],
+    store
+  );
+  const mergedClaude = overridesStore.mergePresetsWithOverrides(
+    [
+      {
+        id: 'claude-glm-5-1',
+        productId: 'claude',
+        name: 'GLM-5.1',
+        configText: '{\n  "env": {}\n}\n',
+        authText: '{\n  "hasCompletedOnboarding": true\n}\n',
+        isBuiltIn: true
+      }
+    ],
+    store
+  );
+
+  assert.equal(mergedCodex.some((preset) => preset.id === 'claude-custom'), false);
+  assert.equal(mergedClaude.some((preset) => preset.id === 'claude-custom'), true);
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });

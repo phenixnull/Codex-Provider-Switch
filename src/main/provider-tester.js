@@ -43,6 +43,14 @@ function resolveWireApi(config) {
   return provider.wire_api;
 }
 
+function resolveQuan2GoTestEndpoint(baseUrl) {
+  try {
+    return new URL('/v1/chat/completions', `${baseUrl}/`).toString();
+  } catch {
+    return `${trimTrailingSlashes(baseUrl).replace(/\/openai$/i, '')}/v1/chat/completions`;
+  }
+}
+
 function buildProviderTestRequest({ configText, authText }) {
   const { config, auth } = parseConfigAndAuth({ configText, authText });
   const apiKey = auth.OPENAI_API_KEY;
@@ -56,15 +64,39 @@ function buildProviderTestRequest({ configText, authText }) {
   }
 
   const wireApi = resolveWireApi(config);
+  const baseUrl = resolveBaseUrl(config);
+  const providerId = config.model_provider || 'unknown';
+
+  if (providerId === 'quan2go') {
+    return {
+      providerId,
+      baseUrl,
+      endpoint: resolveQuan2GoTestEndpoint(baseUrl),
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: {
+        model: config.model,
+        messages: [
+          {
+            role: 'user',
+            content: TEST_PROMPT
+          }
+        ],
+        temperature: 0,
+        stream: false
+      }
+    };
+  }
 
   if (wireApi !== 'responses') {
     throw new Error(`Only responses wire_api is supported for online test. Got "${wireApi}".`);
   }
 
-  const baseUrl = resolveBaseUrl(config);
-
   return {
-    providerId: config.model_provider || 'unknown',
+    providerId,
     baseUrl,
     endpoint: `${baseUrl}/responses`,
     method: 'POST',
@@ -88,6 +120,12 @@ function extractProviderResponseText(payload) {
     return payload.output_text.trim();
   }
 
+  const chatCompletionsText = extractChatCompletionsText(payload);
+
+  if (chatCompletionsText) {
+    return chatCompletionsText;
+  }
+
   if (!Array.isArray(payload.output)) {
     return '';
   }
@@ -107,6 +145,27 @@ function extractProviderResponseText(payload) {
   }
 
   return parts.join('\n').trim();
+}
+
+function extractChatCompletionsText(payload) {
+  if (!Array.isArray(payload?.choices)) {
+    return '';
+  }
+
+  const parts = [];
+
+  for (const choice of payload.choices) {
+    if (typeof choice?.message?.content === 'string' && choice.message.content) {
+      parts.push(choice.message.content);
+      continue;
+    }
+
+    if (typeof choice?.delta?.content === 'string' && choice.delta.content) {
+      parts.push(choice.delta.content);
+    }
+  }
+
+  return parts.join('').trim();
 }
 
 function extractErrorMessage(payload) {
@@ -139,6 +198,76 @@ function buildSuccessResult({ request, payload, status }) {
     responseId: payload && typeof payload === 'object' ? payload.id || '' : '',
     outputText: extractProviderResponseText(payload),
     raw: payload
+  };
+}
+
+function parseEventStreamPayload(text) {
+  if (typeof text !== 'string' || !text.trim()) {
+    return null;
+  }
+
+  const events = text.split(/\r?\n\r?\n/);
+  const contentParts = [];
+  let responseId = '';
+  let model = '';
+
+  for (const event of events) {
+    const lines = event
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const dataLines = lines.filter((line) => line.startsWith('data:'));
+
+    if (dataLines.length === 0) {
+      continue;
+    }
+
+    for (const line of dataLines) {
+      const data = line.slice(5).trim();
+
+      if (!data || data === '[DONE]') {
+        continue;
+      }
+
+      let payload = null;
+
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+
+      if (!responseId && typeof payload.id === 'string') {
+        responseId = payload.id;
+      }
+
+      if (!model && typeof payload.model === 'string') {
+        model = payload.model;
+      }
+
+      if (Array.isArray(payload.choices)) {
+        for (const choice of payload.choices) {
+          if (typeof choice?.message?.content === 'string' && choice.message.content) {
+            contentParts.push(choice.message.content);
+            continue;
+          }
+
+          if (typeof choice?.delta?.content === 'string' && choice.delta.content) {
+            contentParts.push(choice.delta.content);
+          }
+        }
+      }
+    }
+  }
+
+  if (!responseId && !model && contentParts.length === 0) {
+    return null;
+  }
+
+  return {
+    id: responseId,
+    model,
+    output_text: contentParts.join('').trim()
   };
 }
 
@@ -274,6 +403,17 @@ async function parseResponsePayload(response) {
 
     if (!text) {
       return null;
+    }
+
+    const contentType =
+      typeof response?.headers?.get === 'function' ? String(response.headers.get('content-type')) : '';
+
+    if (contentType.includes('text/event-stream') || text.trim().startsWith('data:')) {
+      const parsedEventStream = parseEventStreamPayload(text);
+
+      if (parsedEventStream) {
+        return parsedEventStream;
+      }
     }
 
     try {

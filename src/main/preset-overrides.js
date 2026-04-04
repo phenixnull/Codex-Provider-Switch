@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { sanitizePresetAuthTextForStorage } = require('../shared/config-service');
+const { sanitizeClaudeStatePatchForStorage } = require('../shared/claude-config-service');
 const { isLegacyPresetDescription } = require('../shared/presets');
 
 function getPresetOverrideStorePath(userDataDir) {
@@ -57,12 +58,18 @@ async function readPresetOverrides(storePath) {
   return store.overrides;
 }
 
-async function savePresetOverride({ id, name, description, configText, authText }, storePath) {
+async function savePresetOverride(
+  { id, productId, name, description, configText, authText },
+  storePath
+) {
   const store = await readPresetStore(storePath);
-  const safeAuthText = sanitizePresetAuthTextForStorage({
-    configText,
-    authJsonText: authText
-  });
+  const safeAuthText =
+    productId === 'claude'
+      ? sanitizeClaudeStatePatchForStorage(authText)
+      : sanitizePresetAuthTextForStorage({
+          configText,
+          authJsonText: authText
+        });
   const next = {
     ...store,
     overrides: {
@@ -71,7 +78,8 @@ async function savePresetOverride({ id, name, description, configText, authText 
         name,
         description,
         configText,
-        authText: safeAuthText
+        authText: safeAuthText,
+        ...(productId ? { productId } : {})
       }
     }
   };
@@ -82,19 +90,26 @@ async function savePresetOverride({ id, name, description, configText, authText 
 
 async function saveCustomPreset(preset, storePath) {
   const store = await readPresetStore(storePath);
-  const safeAuthText = sanitizePresetAuthTextForStorage({
-    configText: preset.configText,
-    authJsonText: preset.authText
-  });
+  const productId = preset.productId || 'codex';
+  const safeAuthText =
+    productId === 'claude'
+      ? sanitizeClaudeStatePatchForStorage(preset.authText)
+      : sanitizePresetAuthTextForStorage({
+          configText: preset.configText,
+          authJsonText: preset.authText
+        });
   const nextPreset = {
     id: preset.id,
+    productId,
     name: preset.name,
     description: preset.description,
     configText: preset.configText,
     authText: safeAuthText,
     isBuiltIn: false
   };
-  const customPresets = store.customPresets.filter((item) => item.id !== preset.id);
+  const customPresets = store.customPresets.filter(
+    (item) => !(item.id === preset.id && (item.productId || 'codex') === productId)
+  );
 
   customPresets.push(nextPreset);
 
@@ -141,10 +156,17 @@ async function savePresetOrder(order, storePath) {
 
 function mergePresetsWithOverrides(presets, storeOrOverrides) {
   const store = normalizePresetStore(storeOrOverrides);
+  const targetProductIds = new Set(
+    presets.map((preset) => preset.productId).filter((productId) => !!productId)
+  );
   const mergedBuiltIns = presets.map((preset) => {
     const override = store.overrides[preset.id];
+    const overrideProductId = override?.productId || 'codex';
 
-    if (!override) {
+    if (
+      !override ||
+      (targetProductIds.size > 0 && preset.productId && !targetProductIds.has(overrideProductId))
+    ) {
       return { ...preset };
     }
 
@@ -162,10 +184,18 @@ function mergePresetsWithOverrides(presets, storeOrOverrides) {
 
   return [
     ...mergedBuiltIns,
-    ...store.customPresets.map((preset) => ({
-      ...preset,
-      isBuiltIn: false
-    }))
+    ...store.customPresets
+      .filter((preset) => {
+        if (targetProductIds.size === 0) {
+          return true;
+        }
+
+        return targetProductIds.has(preset.productId || 'codex');
+      })
+      .map((preset) => ({
+        ...preset,
+        isBuiltIn: false
+      }))
   ];
 }
 

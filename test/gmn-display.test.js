@@ -199,3 +199,37 @@ test('buildUsagePresetCardModel formats daily used and total quota for Quan2Go c
   assert.equal(model.progressItems.length, 1);
   assert.equal(model.progressItems[0].percent, 3.96);
 });
+
+test('buildUsagePresetCardModel formats local OpenRouter free daily estimates', () => {
+  assert.equal(typeof gmnDisplay.buildUsagePresetCardModel, 'function');
+
+  const model = gmnDisplay.buildUsagePresetCardModel(
+    {
+      usageKind: 'openrouter_free_daily_estimate',
+      maskedKey: 'sk-or-v...84b5',
+      dailyLimit: 1000,
+      estimatedUsedCount: 12,
+      estimatedRemainingCount: 988,
+      progressPercent: 98.8,
+      totalCredits: 15,
+      totalUsage: 14.1681566,
+      todayModelTokens: 2048
+    },
+    'sk-or-v...84b5',
+    {
+      providerId: 'openrouter'
+    }
+  );
+
+  assert.equal(model.keyText, 'sk-or-v...84b5');
+  assert.equal(model.progressLabelText, 'Daily Free Left');
+  assert.equal(model.progressText, '988 次剩余');
+  assert.equal(
+    model.progressDetailText,
+    '本地今日 12 / 1,000 次 · credits 15 · usage 14.17 · tokens 2,048'
+  );
+  assert.equal(model.statusText, 'ESTIMATE');
+  assert.equal(Array.isArray(model.progressItems), true);
+  assert.equal(model.progressItems.length, 1);
+  assert.equal(model.progressItems[0].percent, 98.8);
+});

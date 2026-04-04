@@ -96,7 +96,8 @@ body::after {
 }
 
 button,
-textarea {
+textarea,
+input {
   font: inherit;
 }
 
@@ -156,6 +157,44 @@ textarea {
 .sidebar-header {
   flex-shrink: 0;
   padding: var(--panel-padding);
+}
+
+.product-switch {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.product-switch__button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(250, 249, 245, 0.72);
+  color: var(--muted-strong);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.product-switch__button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.product-switch__button.is-active {
+  background: #d97757;
+  color: #faf9f5;
+  border-color: rgba(217, 119, 87, 0.4);
+  box-shadow: 0 8px 20px rgba(217, 119, 87, 0.18);
 }
 
 .sidebar-header h1,
@@ -477,6 +516,7 @@ textarea {
 .preset-card__surface {
   display: block;
   width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: none;
@@ -551,8 +591,11 @@ textarea {
   display: block;
   margin-top: 10px;
   color: var(--muted-strong);
-  font-size: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.45;
 }
 
 .preset-card__metrics {
@@ -576,6 +619,7 @@ textarea {
 
 .preset-card__gmn-progress {
   display: block;
+  min-width: 0;
   margin-top: 16px;
   padding: 14px 14px 12px;
   border: 1px solid var(--line);
@@ -594,6 +638,7 @@ textarea {
 
 .preset-card__gmn-progress-head {
   display: block;
+  min-width: 0;
 }
 
 .preset-card__gmn-progress-text {
@@ -602,6 +647,7 @@ textarea {
   font-size: 22px;
   line-height: 1.1;
   letter-spacing: var(--heading-tracking);
+  overflow-wrap: anywhere;
 }
 
 .preset-card__gmn-progress-detail {
@@ -610,6 +656,8 @@ textarea {
   color: var(--muted-strong);
   font-size: 13px;
   font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .preset-card__gmn-progress-track {
@@ -864,6 +912,116 @@ textarea:focus {
   overflow-y: auto;
 }
 
+.claude-console-panel {
+  min-width: 0;
+}
+
+.claude-console-card {
+  gap: 16px;
+}
+
+.claude-console-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.claude-console-field {
+  display: grid;
+  gap: 8px;
+}
+
+.claude-console-field input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #faf9f5;
+  color: var(--text);
+}
+
+.claude-console-field input:focus {
+  outline: 2px solid rgba(217, 119, 87, 0.15);
+  border-color: rgba(217, 119, 87, 0.3);
+}
+
+.claude-console-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.claude-console-meta strong {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.claude-balance-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.76)),
+    linear-gradient(135deg, rgba(106, 155, 204, 0.08), rgba(217, 119, 87, 0.08));
+}
+
+.claude-balance-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.claude-balance-card__head strong {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: var(--heading-tracking);
+}
+
+.claude-balance-card__side {
+  color: var(--muted-strong);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.claude-balance-card__track {
+  display: block;
+  height: 14px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(64, 84, 121, 0.08), rgba(64, 84, 121, 0.14));
+  box-shadow: inset 0 1px 3px rgba(39, 50, 74, 0.08);
+}
+
+.claude-balance-card__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #d97757 0%, #6a9bcc 100%);
+  box-shadow: 0 6px 16px rgba(103, 186, 255, 0.22);
+  transition:
+    width 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.claude-balance-card__foot {
+  margin-top: 10px;
+  color: var(--muted-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .test-panel {
   padding: 18px;
   background:
@@ -874,6 +1032,10 @@ textarea:focus {
 .toolbar-test {
   border-top: 1px solid rgba(64, 84, 121, 0.08);
   padding-top: 8px;
+}
+
+.toolbar-test.is-hidden {
+  display: none;
 }
 
 .toolbar-test.is-loading {
@@ -923,16 +1085,19 @@ textarea:focus {
 }
 
 #message-text[data-tone='success'],
-#test-status[data-tone='success'] {
+#test-status[data-tone='success'],
+#bigmodel-fetch-status[data-tone='success'] {
   color: var(--success);
 }
 
 #message-text[data-tone='error'],
-#test-status[data-tone='error'] {
+#test-status[data-tone='error'],
+#bigmodel-fetch-status[data-tone='error'] {
   color: var(--danger);
 }
 
-#test-status[data-tone='loading'] {
+#test-status[data-tone='loading'],
+#bigmodel-fetch-status[data-tone='loading'] {
   color: var(--accent-sky);
 }
 
@@ -998,6 +1163,8 @@ textarea:focus {
 
 @media (max-width: 860px) {
   .toolbar-actions,
+  .claude-console-actions,
+  .claude-console-grid,
   .paths-grid,
   .test-grid {
     grid-template-columns: 1fr;

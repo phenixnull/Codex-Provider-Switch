@@ -40,7 +40,7 @@ test('buildProviderTestRequest falls back to official OpenAI endpoint for openai
   assert.equal(request.body.model, 'gpt-5.4');
 });
 
-test('buildProviderTestRequest builds the relay responses endpoint for Quan2Go', () => {
+test('buildProviderTestRequest builds the root chat completions endpoint for Quan2Go', () => {
   assert.equal(typeof providerTester.buildProviderTestRequest, 'function');
 
   const preset = getPresetById('quan2go');
@@ -49,8 +49,16 @@ test('buildProviderTestRequest builds the relay responses endpoint for Quan2Go',
     authText: preset.authText
   });
 
-  assert.equal(request.endpoint, 'https://capi.quan2go.com/openai/responses');
+  assert.equal(request.endpoint, 'https://capi.quan2go.com/v1/chat/completions');
   assert.equal(request.body.model, 'gpt-5.4');
+  assert.equal(request.body.stream, false);
+  assert.equal(request.body.temperature, 0);
+  assert.deepEqual(request.body.messages, [
+    {
+      role: 'user',
+      content: 'Reply with exactly: provider test ok'
+    }
+  ]);
 });
 
 test('testProviderConnection returns output_text on success', async () => {
@@ -78,6 +86,47 @@ test('testProviderConnection returns output_text on success', async () => {
   assert.equal(result.status, 200);
   assert.equal(result.outputText, 'provider test ok');
   assert.equal(result.responseId, 'resp_123');
+});
+
+test('testProviderConnection parses Quan2Go SSE chat completions into a normal success result', async () => {
+  assert.equal(typeof providerTester.testProviderConnection, 'function');
+
+  const preset = getPresetById('quan2go');
+  const result = await providerTester.testProviderConnection({
+    configText: preset.configText,
+    authText: preset.authText,
+    fetchImpl: async (url) => {
+      assert.equal(url, 'https://capi.quan2go.com/v1/chat/completions');
+
+      return {
+        ok: true,
+        status: 200,
+        headers: {
+          get(name) {
+            return name === 'content-type' ? 'text/event-stream' : null;
+          }
+        },
+        async text() {
+          return [
+            'data: {"id":"chatcmpl_123","object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"index":0,"delta":{"role":"assistant","content":"provider"},"finish_reason":null}]}',
+            '',
+            'data: {"id":"chatcmpl_123","object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"index":0,"delta":{"content":" test"},"finish_reason":null}]}',
+            '',
+            'data: {"id":"chatcmpl_123","object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"index":0,"delta":{"content":" ok"},"finish_reason":"stop"}]}',
+            '',
+            'data: [DONE]',
+            ''
+          ].join('\n');
+        }
+      };
+    }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.status, 200);
+  assert.equal(result.responseId, 'chatcmpl_123');
+  assert.equal(result.outputText, 'provider test ok');
+  assert.equal(result.endpoint, 'https://capi.quan2go.com/v1/chat/completions');
 });
 
 test('testProviderConnection surfaces HTTP errors with provider response details', async () => {

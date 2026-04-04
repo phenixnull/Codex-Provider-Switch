@@ -102,3 +102,20 @@ test('win32 presets keep Windows-specific config fields', () => {
   assert.equal(gmnPreset.configText.includes('elevated_windows_sandbox = true'), true);
   assert.equal(openAiPreset.configText.includes('windows_wsl_setup_acknowledged = true'), true);
 });
+
+test('Claude preset registry exposes the current GLM-5.1 preset separately from Codex presets', () => {
+  assert.equal(typeof presetsModule.listPresetsByProduct, 'function');
+  assert.equal(typeof presetsModule.getPresetById, 'function');
+
+  const codexIds = presetsModule.listPresetsByProduct('codex').map((preset) => preset.id).sort();
+  const claudeIds = presetsModule.listPresetsByProduct('claude').map((preset) => preset.id).sort();
+  const preset = presetsModule.getPresetById('claude-glm-5-1');
+
+  assert.deepEqual(codexIds, ['92scw', 'gmn', 'gwen', 'openai', 'quan2go']);
+  assert.deepEqual(claudeIds, ['claude-glm-5-1']);
+  assert.equal(preset.productId, 'claude');
+  assert.match(preset.configText, /"ANTHROPIC_BASE_URL": "https:\/\/open\.bigmodel\.cn\/api\/anthropic"/);
+  assert.match(preset.configText, /"ANTHROPIC_DEFAULT_OPUS_MODEL": "GLM-5\.1"/);
+  assert.match(preset.configText, /"ANTHROPIC_DEFAULT_SONNET_MODEL": "GLM-5\.1"/);
+  assert.match(preset.authText, /"hasCompletedOnboarding": true/);
+});

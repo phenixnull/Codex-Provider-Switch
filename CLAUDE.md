@@ -9,8 +9,10 @@ npm install          # one-time setup
 npm start            # launch the Electron app locally
 npm test             # run all tests (node --test)
 npm run build        # unpacked Electron build → dist/
-npm run dist         # portable Windows package → dist/
+npm run dist         # portable package → dist/
 ```
+
+Platform-specific builds: `npm run build:win`, `npm run build:mac`, `npm run dist:win`, `npm run dist:mac`.
 
 To run a single test file:
 ```bash
@@ -19,7 +21,7 @@ node --test test/config-service.test.js
 
 ## Architecture
 
-This is an **Electron desktop app** (Windows) for switching Codex provider presets and editing `~/.codex/` credentials. There is no bundler — all source is plain CommonJS loaded directly by Electron.
+This is an **Electron desktop app** (Windows + macOS) for switching Codex provider presets and editing `~/.codex/` credentials. There is no bundler — all source is plain CommonJS loaded directly by Electron.
 
 ### Process boundaries
 
@@ -39,14 +41,15 @@ The preload exposes exactly one global: `window.codexApp`, with methods that map
 
 | Channel | Purpose |
 |---|---|
-| `app:bootstrap` | Initial load — returns merged presets, live config/auth, active provider |
+| `app:bootstrap` | Initial load — returns merged presets, live config/auth, active provider (usage deferred) |
 | `app:read-live-files` | Re-read `~/.codex/` config.toml + auth.json |
 | `app:get-preset` / `app:save-preset` | Read/write a single preset (applies config+auth to `~/.codex/`) |
 | `app:create-custom-preset` | Persist a new user-defined preset |
+| `app:save-preset-order` | Persist the sidebar preset display order |
 | `app:save-files` | Write raw config.toml / auth.json text without preset logic |
 | `app:test-provider` | Connectivity check against a provider's base URL |
 | `app:gmn-login` / `app:gmn-logout` / `app:gmn-refresh` | GMN session lifecycle |
-| `app:92scw-refresh` / `app:gwen-refresh` | Fetch usage/quota for 92scw / GWEN |
+| `app:92scw-refresh` / `app:gwen-refresh` / `app:openai-refresh` | Fetch usage/quota for each provider |
 | `app:open-codex-dir` | Open `~/.codex/` in the system file manager |
 
 ### Preset system
@@ -57,24 +60,33 @@ Built-in presets are hardcoded in `src/shared/presets.js` (ids: `92scw`, `gmn`, 
 
 The app reads and writes two files in `~/.codex/`:
 - `config.toml` — parsed with `@iarna/toml`; must remain valid TOML before any write
-- `auth.json` — must be a plain JSON object; always written as `{ "OPENAI_API_KEY": "..." }`
+- `auth.json` — must be a plain JSON object; typically `{ "OPENAI_API_KEY": "..." }`, but OpenAI official can also use ChatGPT sign-in format with `auth_mode: "chatgpt"` and `tokens.access_token`
 
 `mergePresetWithExistingConfig()` in `src/shared/config-service.js` preserves the user's existing `projects` table when applying a preset config.
 
+### Bootstrap flow
+
+On startup, `app:bootstrap` calls `buildBootstrapPayload()` (`src/main/bootstrap-payload.js`) which returns presets, live config/auth, and initial (empty) provider usage. Usage data is loaded lazily via the per-provider refresh channels to keep startup fast.
+
 ### Provider usage modules
 
-Each third-party provider has its own usage-fetching module in `src/main/`:
+Each provider has its own usage-fetching module in `src/main/`:
 - `gmn-account.js` — session-based auth (login → JWT → auto-refresh); session stored in `<userData>/gmn-session.json`
 - `gwen-usage.js` — single GET to `https://ai.love-gwen.top/v1/usage` with Bearer key
-- `newapi-token-usage.js` — hits `<baseUrl>/api/status` then `<baseUrl>/api/usage/token`; quota units are configurable; used by the `92scw` preset (the `build92scwProviderUsage` function in `main.js` delegates to this module)
+- `newapi-token-usage.js` — hits `<baseUrl>/api/status` then `<baseUrl>/api/usage/token`; quota units are configurable; used by the `92scw` preset
+- `openai-usage.js` — fetches usage via `https://chatgpt.com/backend-api/wham/usage` using ChatGPT access token auth
 
 ### Windows-specific TLS fallback
 
 `provider-tester.js` detects 403 responses with an OpenResty HTML body on `win32` and re-runs the request via an encoded PowerShell `Invoke-RestMethod` script to bypass Windows TLS interception.
 
+### Cross-platform support
+
+`src/main/window-options.js` provides platform-specific window dimensions (taller on macOS). `src/shared/presets.js` generates platform-aware default config (different models/settings per platform). Build targets include both Windows portable and macOS dmg/zip.
+
 ### UI notes
 
-The renderer UI is in Chinese. `renderer.js` is the main orchestrator; `gmn-display.js` handles GMN-specific account/usage display logic in the sidebar. The layout uses CSS Grid (fixed 348px sidebar + flexible main area).
+The renderer UI is in Chinese. `renderer.js` is the main orchestrator; `gmn-display.js` handles provider usage card models in the sidebar; `openai-auth.js` handles ChatGPT sign-in auth parsing for the official OpenAI preset. The layout uses CSS Grid (fixed sidebar + flexible main area).
 
 ## Style conventions
 

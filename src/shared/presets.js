@@ -2,12 +2,18 @@ function buildConfigText(lines) {
   return `${lines.join('\n')}\n`;
 }
 
+function buildJsonText(value) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
 const BUILT_IN_PRESET_DESCRIPTIONS = {
   '92scw': '92scw relay preset with codex provider and sk key auth.',
   gmn: 'GMN relay preset with codex provider and GMN-issued sk keys.',
   gwen: 'Gwen relay preset with the gwen provider and cr_ activation keys.',
   openai: 'Official OpenAI direct preset using the built-in openai provider.',
-  quan2go: 'Quan2Go relay preset with activation-code auth.'
+  quan2go: 'Quan2Go relay preset with activation-code auth.',
+  'claude-glm-5-1':
+    'BigModel Claude Code preset using the Anthropic-compatible GLM-5.1 endpoint.'
 };
 
 const LEGACY_MOJIBAKE_PRESET_DESCRIPTIONS = {
@@ -195,9 +201,30 @@ function buildQuan2GoConfigText() {
   ]);
 }
 
+function buildClaudeGlm51ConfigText() {
+  return buildJsonText({
+    env: {
+      ANTHROPIC_AUTH_TOKEN: 'replace-with-zhipu-api-key',
+      ANTHROPIC_BASE_URL: 'https://open.bigmodel.cn/api/anthropic',
+      ANTHROPIC_DEFAULT_OPUS_MODEL: 'GLM-5.1',
+      ANTHROPIC_DEFAULT_SONNET_MODEL: 'GLM-5.1',
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: 'GLM-4.5-air',
+      API_TIMEOUT_MS: '3000000',
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
+    }
+  });
+}
+
+function buildClaudeGlm51StatePatchText() {
+  return buildJsonText({
+    hasCompletedOnboarding: true
+  });
+}
+
 function buildPresetDefinitions(platform = process.platform) {
   return [
     {
+      productId: 'codex',
       id: '92scw',
       name: '92scw',
       description: getBuiltInPresetDescription('92scw'),
@@ -208,6 +235,7 @@ function buildPresetDefinitions(platform = process.platform) {
 `
     },
     {
+      productId: 'codex',
       id: 'gmn',
       name: 'GMN',
       description: getBuiltInPresetDescription('gmn'),
@@ -218,6 +246,7 @@ function buildPresetDefinitions(platform = process.platform) {
 `
     },
     {
+      productId: 'codex',
       id: 'gwen',
       name: 'Gwen',
       description: getBuiltInPresetDescription('gwen'),
@@ -228,6 +257,7 @@ function buildPresetDefinitions(platform = process.platform) {
 `
     },
     {
+      productId: 'codex',
       id: 'openai',
       name: 'OpenAI Official',
       description: getBuiltInPresetDescription('openai'),
@@ -238,6 +268,7 @@ function buildPresetDefinitions(platform = process.platform) {
 `
     },
     {
+      productId: 'codex',
       id: 'quan2go',
       name: 'Quan2Go',
       description: getBuiltInPresetDescription('quan2go'),
@@ -246,6 +277,14 @@ function buildPresetDefinitions(platform = process.platform) {
   "OPENAI_API_KEY": "replace-with-activation-code"
 }
 `
+    },
+    {
+      productId: 'claude',
+      id: 'claude-glm-5-1',
+      name: 'GLM-5.1 (Claude Code)',
+      description: getBuiltInPresetDescription('claude-glm-5-1'),
+      configText: buildClaudeGlm51ConfigText(),
+      authText: buildClaudeGlm51StatePatchText()
     }
   ];
 }
@@ -257,7 +296,13 @@ function clonePreset(preset) {
 }
 
 function listPresets(platform = process.platform) {
-  return buildPresetDefinitions(platform).map(clonePreset);
+  return listPresetsByProduct('codex', platform);
+}
+
+function listPresetsByProduct(productId = 'codex', platform = process.platform) {
+  return buildPresetDefinitions(platform)
+    .filter((preset) => preset.productId === productId)
+    .map(clonePreset);
 }
 
 function getPresetById(id, platform = process.platform) {
@@ -274,5 +319,6 @@ module.exports = {
   getBuiltInPresetDescription,
   getPresetById,
   isLegacyPresetDescription,
-  listPresets
+  listPresets,
+  listPresetsByProduct
 };

@@ -5,15 +5,27 @@ const DEFAULT_DEBOUNCE_MS = 120;
 
 function buildLiveReloadRoots(appPath) {
   return [
+    path.join(appPath, 'src', 'main'),
+    path.join(appPath, 'src', 'preload'),
     path.join(appPath, 'src', 'renderer'),
-    path.join(appPath, 'src', 'preload')
   ];
+}
+
+function resolveRootAction(root) {
+  const normalizedRoot = String(root || '').replace(/\\/g, '/');
+
+  if (normalizedRoot.endsWith('/src/renderer')) {
+    return 'reload';
+  }
+
+  return 'restart';
 }
 
 function createLiveReloadWatcher({
   roots,
   watchImpl = fs.watch,
   reloadWindow,
+  restartApp,
   debounceMs = DEFAULT_DEBOUNCE_MS,
   setTimeoutImpl = setTimeout,
   clearTimeoutImpl = clearTimeout
@@ -24,21 +36,36 @@ function createLiveReloadWatcher({
 
   const watchers = [];
   let reloadTimer = null;
+  let pendingAction = 'reload';
 
-  const scheduleReload = () => {
+  const scheduleReload = (action = 'reload') => {
+    if (action === 'restart') {
+      pendingAction = 'restart';
+    } else if (!pendingAction) {
+      pendingAction = 'reload';
+    }
+
     if (reloadTimer) {
       clearTimeoutImpl(reloadTimer);
     }
 
     reloadTimer = setTimeoutImpl(() => {
       reloadTimer = null;
+      const actionToRun = pendingAction || 'reload';
+      pendingAction = 'reload';
+
+      if (actionToRun === 'restart' && typeof restartApp === 'function') {
+        restartApp();
+        return;
+      }
+
       reloadWindow();
     }, debounceMs);
   };
 
   for (const root of roots) {
     const watcher = watchImpl(root, { recursive: true }, () => {
-      scheduleReload();
+      scheduleReload(resolveRootAction(root));
     });
     watchers.push(watcher);
   }
@@ -55,7 +82,7 @@ function createLiveReloadWatcher({
   };
 }
 
-function setupLiveReload(window, { appPath, watchImpl = fs.watch } = {}) {
+function setupLiveReload(window, { appPath, watchImpl = fs.watch, restartApp } = {}) {
   if (!window || typeof window.isDestroyed !== 'function') {
     return () => {};
   }
@@ -72,7 +99,8 @@ function setupLiveReload(window, { appPath, watchImpl = fs.watch } = {}) {
         }
 
         window.webContents.reloadIgnoringCache();
-      }
+      },
+      restartApp
     });
   } catch {
     return () => {};

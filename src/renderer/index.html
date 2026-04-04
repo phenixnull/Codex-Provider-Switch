@@ -7,18 +7,39 @@
       content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Codex Provider Switch</title>
+    <title>Codex / Claude Switch</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="sidebar-header">
-          <p class="eyebrow">Codex Provider Switch</p>
-          <h1>供应商切换器</h1>
-          <p class="subtle">
-            选择左侧预设后，直接编辑并保存 `config.toml` 与 `auth.json`，再决定是否启用到
-            Codex。
+          <div class="product-switch" role="tablist" aria-label="Product Switch">
+            <button
+              id="product-codex-btn"
+              class="product-switch__button"
+              type="button"
+              data-product-id="codex"
+              role="tab"
+              aria-selected="true"
+            >
+              Codex
+            </button>
+            <button
+              id="product-claude-btn"
+              class="product-switch__button"
+              type="button"
+              data-product-id="claude"
+              role="tab"
+              aria-selected="false"
+            >
+              Claude
+            </button>
+          </div>
+          <p id="sidebar-eyebrow" class="eyebrow">Codex Provider Switch</p>
+          <h1 id="sidebar-title">供应商切换器</h1>
+          <p id="sidebar-subtle" class="subtle">
+            选择左侧预设后，直接编辑并保存当前产品对应的配置文件，再决定是否立即启用。
           </p>
         </div>
 
@@ -46,27 +67,28 @@
         <section class="toolbar">
           <div class="toolbar-top">
             <div class="target-panel">
-              <p class="eyebrow">当前编辑目标</p>
+              <p id="target-eyebrow" class="eyebrow">当前编辑目标</p>
               <input
                 id="preset-name-input"
                 class="target-name-input"
                 type="text"
-                placeholder="输入供应商名称"
+                placeholder="输入预设名称"
               />
               <textarea
                 id="preset-description-input"
                 class="target-description-input"
                 rows="1"
-                placeholder="输入供应商说明"
+                placeholder="输入预设说明"
               ></textarea>
             </div>
 
             <div class="toolbar-actions">
               <button id="reload-live-btn" class="secondary" type="button">读取当前文件</button>
+              <button id="usage-btn" class="secondary" type="button" hidden>查看额度</button>
               <button id="test-btn" class="secondary" type="button">在线测试</button>
               <button id="save-preset-btn" class="secondary" type="button">保存预设</button>
-              <button id="open-dir-btn" class="secondary" type="button">打开 .codex 目录</button>
-              <button id="apply-btn" class="primary" type="button">启用到 Codex</button>
+              <button id="open-dir-btn" class="secondary" type="button">打开目录</button>
+              <button id="apply-btn" class="primary" type="button">启用</button>
             </div>
           </div>
 
@@ -94,11 +116,11 @@
 
         <section class="paths-grid">
           <article class="path-card">
-            <span class="status-label">config.toml</span>
+            <span id="config-file-label" class="status-label">config.toml</span>
             <strong id="config-path">-</strong>
           </article>
           <article class="path-card">
-            <span class="status-label">auth.json</span>
+            <span id="auth-file-label" class="status-label">auth.json</span>
             <strong id="auth-path">-</strong>
           </article>
         </section>
@@ -108,14 +130,122 @@
           <pre id="test-output" class="test-output" hidden></pre>
         </section>
 
+        <section id="claude-console-panel" class="claude-console-panel" hidden>
+          <article class="editor-card claude-console-card">
+            <div class="editor-header">
+              <div>
+                <p class="eyebrow">BigModel Console</p>
+                <h3>控制台抓取</h3>
+              </div>
+              <span class="editor-tip">
+                账号密码和 API Key 仅保存到本机 `userData` 下的本地文件，用于登录 BigModel 控制台并抓取 API Key / 用量统计。
+              </span>
+            </div>
+
+            <div class="claude-console-grid">
+              <label class="claude-console-field">
+                <span class="status-label">账号</span>
+                <input id="bigmodel-username-input" type="text" placeholder="example@domain.com" />
+              </label>
+              <label class="claude-console-field">
+                <span class="status-label">密码</span>
+                <input
+                  id="bigmodel-password-input"
+                  type="password"
+                  placeholder="留空则保留当前已保存密码"
+                />
+              </label>
+              <label class="claude-console-field">
+                <span class="status-label">API Key</span>
+                <input
+                  id="bigmodel-api-key-input"
+                  type="password"
+                  placeholder="留空则保留当前已保存 Key"
+                />
+              </label>
+              <label class="claude-console-field">
+                <span class="status-label">Organization ID</span>
+                <input id="bigmodel-organization-input" type="text" placeholder="可选，留空自动探测" />
+              </label>
+              <label class="claude-console-field">
+                <span class="status-label">Project ID</span>
+                <input id="bigmodel-project-input" type="text" placeholder="可选，留空自动探测" />
+              </label>
+            </div>
+
+            <div class="claude-console-actions">
+              <button id="bigmodel-save-btn" class="secondary" type="button">更新本地凭据</button>
+              <button id="bigmodel-fetch-btn" class="primary" type="button">一键查额度</button>
+            </div>
+
+            <div class="test-grid claude-console-meta">
+              <div>
+                <span class="status-label">已保存账号</span>
+                <strong id="bigmodel-saved-account">-</strong>
+              </div>
+              <div>
+                <span class="status-label">密码状态</span>
+                <strong id="bigmodel-password-state">未保存</strong>
+              </div>
+              <div>
+                <span class="status-label">已保存 Key</span>
+                <strong id="bigmodel-saved-key">-</strong>
+              </div>
+              <div>
+                <span class="status-label">本地上下文</span>
+                <strong id="bigmodel-saved-context">-</strong>
+              </div>
+            </div>
+
+            <div class="test-grid claude-console-meta">
+              <div>
+                <span class="status-label">抓取状态</span>
+                <strong id="bigmodel-fetch-status">未抓取</strong>
+              </div>
+              <div>
+                <span class="status-label">当前上下文</span>
+                <strong id="bigmodel-fetch-context">-</strong>
+              </div>
+              <div>
+                <span class="status-label">API Keys</span>
+                <strong id="bigmodel-fetch-keys">-</strong>
+              </div>
+              <div>
+                <span class="status-label">用量摘要</span>
+                <strong id="bigmodel-fetch-usage">-</strong>
+              </div>
+            </div>
+
+            <div class="claude-balance-card">
+              <div class="claude-balance-card__head">
+                <div>
+                  <span class="status-label">官方额度</span>
+                  <strong id="bigmodel-balance-main">-</strong>
+                </div>
+                <div class="claude-balance-card__side">
+                  <span id="bigmodel-balance-side">等待查询</span>
+                </div>
+              </div>
+              <span class="claude-balance-card__track" aria-hidden="true">
+                <span id="bigmodel-balance-fill" class="claude-balance-card__fill"></span>
+              </span>
+              <div class="claude-balance-card__foot">
+                <span id="bigmodel-balance-foot">切到 Claude 后会自动尝试同步一次。</span>
+              </div>
+            </div>
+
+            <pre id="bigmodel-console-output" class="test-output" hidden></pre>
+          </article>
+        </section>
+
         <section class="editors">
           <article class="editor-card">
             <div class="editor-header">
               <div>
-                <p class="eyebrow">config.toml</p>
-                <h3>配置文件</h3>
+                <p id="config-editor-label" class="eyebrow">config.toml</p>
+                <h3 id="config-editor-title">配置文件</h3>
               </div>
-              <span class="editor-tip">直接展示并编辑当前预设对应的 TOML 内容</span>
+              <span id="config-editor-tip" class="editor-tip">直接编辑当前产品的主配置文件。</span>
             </div>
             <textarea id="config-editor" spellcheck="false"></textarea>
           </article>
@@ -123,10 +253,10 @@
           <article class="editor-card">
             <div class="editor-header">
               <div>
-                <p class="eyebrow">auth.json</p>
-                <h3>鉴权文件</h3>
+                <p id="auth-editor-label" class="eyebrow">auth.json</p>
+                <h3 id="auth-editor-title">附加状态文件</h3>
               </div>
-              <span class="editor-tip">先保存预设，再按需启用到 Codex</span>
+              <span id="auth-editor-tip" class="editor-tip">先保存预设，再按需启用到当前产品。</span>
             </div>
             <textarea id="auth-editor" spellcheck="false"></textarea>
           </article>

@@ -9,12 +9,13 @@ const {
   setupLiveReload
 } = require('../src/main/live-reload');
 
-test('buildLiveReloadRoots points at renderer and preload source folders', () => {
+test('buildLiveReloadRoots points at main, preload, and renderer source folders', () => {
   const roots = buildLiveReloadRoots('D:/repo/app');
 
   assert.deepEqual(roots, [
+    path.join('D:/repo/app', 'src', 'main'),
+    path.join('D:/repo/app', 'src', 'preload'),
     path.join('D:/repo/app', 'src', 'renderer'),
-    path.join('D:/repo/app', 'src', 'preload')
   ]);
 });
 
@@ -74,6 +75,39 @@ test('createLiveReloadWatcher debounces multiple file changes into one reload', 
   stop();
 });
 
+test('createLiveReloadWatcher prefers a full restart when src/main changes', async () => {
+  let listener = null;
+  let reloads = 0;
+  let restarts = 0;
+
+  const stop = createLiveReloadWatcher({
+    roots: ['renderer-root', 'main-root'],
+    watchImpl: (root, _options, nextListener) => {
+      if (root === 'main-root') {
+        listener = nextListener;
+      }
+
+      return {
+        close() {}
+      };
+    },
+    reloadWindow: () => {
+      reloads += 1;
+    },
+    restartApp: () => {
+      restarts += 1;
+    },
+    debounceMs: 10
+  });
+
+  listener('change', 'main.js');
+  await new Promise((resolve) => setTimeout(resolve, 30));
+
+  assert.equal(reloads, 0);
+  assert.equal(restarts, 1);
+  stop();
+});
+
 test('setupLiveReload reloads the BrowserWindow when a watched file changes', async () => {
   let listener = null;
   let reloadCalls = 0;
@@ -104,5 +138,40 @@ test('setupLiveReload reloads the BrowserWindow when a watched file changes', as
   await new Promise((resolve) => setTimeout(resolve, DEFAULT_DEBOUNCE_MS + 40));
 
   assert.equal(reloadCalls, 1);
+  stop();
+});
+
+test('setupLiveReload restarts the app when a main-process file changes', async () => {
+  let listeners = [];
+  let restartCalls = 0;
+
+  const stop = setupLiveReload(
+    {
+      isDestroyed: () => false,
+      webContents: {
+        reloadIgnoringCache() {}
+      }
+    },
+    {
+      appPath: 'D:/repo/app',
+      restartApp: () => {
+        restartCalls += 1;
+      },
+      watchImpl: (_root, _options, nextListener) => {
+        listeners.push(nextListener);
+        return {
+          close() {}
+        };
+      }
+    }
+  );
+
+  const mainListener = listeners[0];
+  assert.equal(typeof mainListener, 'function');
+
+  mainListener('change', 'main.js');
+  await new Promise((resolve) => setTimeout(resolve, DEFAULT_DEBOUNCE_MS + 40));
+
+  assert.equal(restartCalls, 1);
   stop();
 });
