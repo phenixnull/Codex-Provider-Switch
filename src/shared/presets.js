@@ -8,13 +8,18 @@ function buildJsonText(value) {
 
 const BUILT_IN_PRESET_DESCRIPTIONS = {
   '92scw': '92scw relay preset with codex provider and sk key auth.',
-  gmn: 'GMN relay preset with codex provider and GMN-issued sk keys.',
+  gmn: 'GMN 代理，使用 codex provider 和后台生成的 sk 密钥。',
   gwen: 'Gwen relay preset with the gwen provider and cr_ activation keys.',
-  openai: 'Official OpenAI direct preset using the built-in openai provider.',
+  openai: '官方 OpenAI 直连配置，使用内置 openai provider。',
   quan2go: 'Quan2Go relay preset with activation-code auth.',
   'claude-glm-5-1':
-    'BigModel Claude Code preset using the Anthropic-compatible GLM-5.1 endpoint.'
+    'BigModel Claude Code preset using the Anthropic-compatible GLM-5.1 endpoint.',
+  'claude-openrouter-qwen3-6-plus-free':
+    'OpenRouter Claude Code preset using qwen/qwen3.6-plus:free over the Anthropic-compatible endpoint.'
 };
+
+const OPENROUTER_API_KEY_PLACEHOLDER =
+  'sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 const LEGACY_MOJIBAKE_PRESET_DESCRIPTIONS = {
   '92scw':
@@ -43,9 +48,10 @@ function build92scwConfigText(platform) {
   const lines = [
     'model_provider = "codex"',
     'model = "gpt-5.4"',
-    'model_reasoning_effort = "high"',
+    'model_reasoning_effort = "xhigh"',
     'network_access = "enabled"',
     'disable_response_storage = true',
+    ...(isWindowsPlatform(platform) ? ['windows_wsl_setup_acknowledged = true'] : []),
     'model_verbosity = "high"',
     '',
     '[model_providers.codex]',
@@ -56,13 +62,7 @@ function build92scwConfigText(platform) {
   ];
 
   if (isWindowsPlatform(platform)) {
-    lines.push(
-      '',
-      'windows_wsl_setup_acknowledged = true',
-      '',
-      '[windows]',
-      'sandbox = "elevated"'
-    );
+    lines.push('', '[windows]', 'sandbox = "elevated"');
   }
 
   return buildConfigText(lines);
@@ -74,6 +74,7 @@ function buildGmnConfigText(platform) {
     'model_reasoning_effort = "xhigh"',
     'disable_response_storage = true',
     'sandbox_mode = "danger-full-access"',
+    ...(isWindowsPlatform(platform) ? ['windows_wsl_setup_acknowledged = true'] : []),
     'approval_policy = "never"',
     'profile = "auto-max"',
     'file_opener = "vscode"',
@@ -101,6 +102,7 @@ function buildGmnConfigText(platform) {
     'unified_exec = false',
     'streamable_shell = false',
     'rmcp_client = true',
+    ...(isWindowsPlatform(platform) ? ['elevated_windows_sandbox = true'] : []),
     '',
     '[profiles.auto-max]',
     'approval_policy = "never"',
@@ -120,11 +122,6 @@ function buildGmnConfigText(platform) {
     'requires_openai_auth = true'
   ];
 
-  if (isWindowsPlatform(platform)) {
-    lines.splice(4, 0, 'windows_wsl_setup_acknowledged = true');
-    lines.splice(lines.indexOf('[profiles.auto-max]') - 1, 0, 'elevated_windows_sandbox = true');
-  }
-
   return buildConfigText(lines);
 }
 
@@ -133,12 +130,12 @@ function buildGwenConfigText() {
     'model_provider = "gwen"',
     'model = "gpt-5.4"',
     'review_model = "gpt-5.4"',
-    'model_reasoning_effort = "high"',
+    'model_reasoning_effort = "xhigh"',
     'model_context_window = 1000000',
     'model_auto_compact_token_limit = 350000',
     'service_tier = "fast"',
     'approval_policy = "on-request"',
-    'sandbox_mode = "workspace-write"',
+    'sandbox_mode = "danger-full-access"',
     '',
     '[sandbox_workspace_write]',
     'network_access = true',
@@ -169,17 +166,18 @@ function buildOpenAiConfigText(platform) {
   const lines = [
     'model_provider = "openai"',
     'model = "gpt-5.4"',
-    'model_reasoning_effort = "high"',
+    'model_reasoning_effort = "xhigh"',
     'approval_policy = "on-request"',
     'sandbox_mode = "workspace-write"',
     'disable_response_storage = true',
+    ...(isWindowsPlatform(platform) ? ['windows_wsl_setup_acknowledged = true'] : []),
     '',
     '[sandbox_workspace_write]',
     'network_access = true'
   ];
 
   if (isWindowsPlatform(platform)) {
-    lines.splice(6, 0, 'windows_wsl_setup_acknowledged = true');
+    lines.push('', '[windows]', 'sandbox = "elevated"');
   }
 
   return buildConfigText(lines);
@@ -190,6 +188,8 @@ function buildQuan2GoConfigText() {
     'model_provider = "quan2go"',
     'model = "gpt-5.4"',
     'review_model = "gpt-5.4"',
+    'model_context_window = 1000000',
+    'model_auto_compact_token_limit = 800000',
     'model_reasoning_effort = "xhigh"',
     'disable_response_storage = true',
     '',
@@ -206,12 +206,42 @@ function buildClaudeGlm51ConfigText() {
     env: {
       ANTHROPIC_AUTH_TOKEN: 'replace-with-zhipu-api-key',
       ANTHROPIC_BASE_URL: 'https://open.bigmodel.cn/api/anthropic',
+      API_TIMEOUT_MS: '3000000',
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: 'GLM-4.5-air',
       ANTHROPIC_DEFAULT_OPUS_MODEL: 'GLM-5.1',
       ANTHROPIC_DEFAULT_SONNET_MODEL: 'GLM-5.1',
-      ANTHROPIC_DEFAULT_HAIKU_MODEL: 'GLM-4.5-air',
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: '80'
+    },
+    permissions: {
+      allow: [],
+      deny: []
+    },
+    model: 'opus[1m]',
+    enabledPlugins: {
+      'glm-plan-usage@zai-coding-plugins': true,
+      'glm-plan-bug@zai-coding-plugins': true
+    },
+    skipDangerousModePermissionPrompt: true
+  });
+}
+
+function buildClaudeOpenRouterQwenFreeConfigText() {
+  return buildJsonText({
+    env: {
+      OPENROUTER_API_KEY: OPENROUTER_API_KEY_PLACEHOLDER,
+      ANTHROPIC_BASE_URL: 'https://openrouter.ai/api',
+      ANTHROPIC_AUTH_TOKEN: OPENROUTER_API_KEY_PLACEHOLDER,
+      ANTHROPIC_API_KEY: '',
+      ANTHROPIC_MODEL: 'qwen/qwen3.6-plus:free',
+      ANTHROPIC_DEFAULT_OPUS_MODEL: 'qwen/qwen3.6-plus:free',
+      ANTHROPIC_DEFAULT_SONNET_MODEL: 'qwen/qwen3.6-plus:free',
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: 'qwen/qwen3.6-plus:free',
       API_TIMEOUT_MS: '3000000',
-      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
-    }
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+      CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: '80'
+    },
+    model: 'sonnet'
   });
 }
 
@@ -284,6 +314,14 @@ function buildPresetDefinitions(platform = process.platform) {
       name: 'GLM-5.1 (Claude Code)',
       description: getBuiltInPresetDescription('claude-glm-5-1'),
       configText: buildClaudeGlm51ConfigText(),
+      authText: buildClaudeGlm51StatePatchText()
+    },
+    {
+      productId: 'claude',
+      id: 'claude-openrouter-qwen3-6-plus-free',
+      name: 'OpenRouter Qwen3.6 Plus Free (Claude Code)',
+      description: getBuiltInPresetDescription('claude-openrouter-qwen3-6-plus-free'),
+      configText: buildClaudeOpenRouterQwenFreeConfigText(),
       authText: buildClaudeGlm51StatePatchText()
     }
   ];

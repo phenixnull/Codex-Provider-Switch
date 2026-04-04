@@ -34,6 +34,7 @@ test('official OpenAI preset uses the official openai provider id', () => {
 
   assert.match(preset.configText, /model_provider = "openai"/);
   assert.match(preset.configText, /model = "gpt-5\.4"/);
+  assert.match(preset.configText, /model_reasoning_effort = "xhigh"/);
   assert.match(preset.authText, /OPENAI_API_KEY/);
 });
 
@@ -44,6 +45,8 @@ test('Quan2Go preset uses the relay endpoint and activation-code auth field', ()
 
   assert.match(preset.configText, /model_provider = "quan2go"/);
   assert.match(preset.configText, /https:\/\/capi\.quan2go\.com\/openai/);
+  assert.match(preset.configText, /model_context_window = 1000000/);
+  assert.match(preset.configText, /model_auto_compact_token_limit = 800000/);
   assert.match(preset.authText, /OPENAI_API_KEY/);
 });
 
@@ -60,7 +63,7 @@ test('built-in preset descriptions stay human-readable', () => {
   );
   assert.equal(
     descriptions.gmn,
-    'GMN relay preset with codex provider and GMN-issued sk keys.'
+    'GMN 代理，使用 codex provider 和后台生成的 sk 密钥。'
   );
   assert.equal(
     descriptions.gwen,
@@ -68,7 +71,7 @@ test('built-in preset descriptions stay human-readable', () => {
   );
   assert.equal(
     descriptions.openai,
-    'Official OpenAI direct preset using the built-in openai provider.'
+    '官方 OpenAI 直连配置，使用内置 openai provider。'
   );
   assert.equal(
     descriptions.quan2go,
@@ -88,6 +91,7 @@ test('darwin presets omit Windows-specific config fields', () => {
   assert.equal(gmnPreset.configText.includes('windows_wsl_setup_acknowledged'), false);
   assert.equal(gmnPreset.configText.includes('elevated_windows_sandbox'), false);
   assert.equal(openAiPreset.configText.includes('windows_wsl_setup_acknowledged'), false);
+  assert.equal(openAiPreset.configText.includes('[windows]'), false);
 });
 
 test('win32 presets keep Windows-specific config fields', () => {
@@ -101,21 +105,31 @@ test('win32 presets keep Windows-specific config fields', () => {
   assert.equal(scwPreset.configText.includes('[windows]'), true);
   assert.equal(gmnPreset.configText.includes('elevated_windows_sandbox = true'), true);
   assert.equal(openAiPreset.configText.includes('windows_wsl_setup_acknowledged = true'), true);
+  assert.equal(openAiPreset.configText.includes('[windows]'), true);
 });
 
-test('Claude preset registry exposes the current GLM-5.1 preset separately from Codex presets', () => {
+test('Claude preset registry exposes the tracked Claude preset catalog separately from Codex presets', () => {
   assert.equal(typeof presetsModule.listPresetsByProduct, 'function');
   assert.equal(typeof presetsModule.getPresetById, 'function');
 
   const codexIds = presetsModule.listPresetsByProduct('codex').map((preset) => preset.id).sort();
   const claudeIds = presetsModule.listPresetsByProduct('claude').map((preset) => preset.id).sort();
-  const preset = presetsModule.getPresetById('claude-glm-5-1');
+  const glmPreset = presetsModule.getPresetById('claude-glm-5-1');
+  const openRouterPreset = presetsModule.getPresetById('claude-openrouter-qwen3-6-plus-free');
 
   assert.deepEqual(codexIds, ['92scw', 'gmn', 'gwen', 'openai', 'quan2go']);
-  assert.deepEqual(claudeIds, ['claude-glm-5-1']);
-  assert.equal(preset.productId, 'claude');
-  assert.match(preset.configText, /"ANTHROPIC_BASE_URL": "https:\/\/open\.bigmodel\.cn\/api\/anthropic"/);
-  assert.match(preset.configText, /"ANTHROPIC_DEFAULT_OPUS_MODEL": "GLM-5\.1"/);
-  assert.match(preset.configText, /"ANTHROPIC_DEFAULT_SONNET_MODEL": "GLM-5\.1"/);
-  assert.match(preset.authText, /"hasCompletedOnboarding": true/);
+  assert.deepEqual(claudeIds, ['claude-glm-5-1', 'claude-openrouter-qwen3-6-plus-free']);
+  assert.equal(glmPreset.productId, 'claude');
+  assert.match(glmPreset.configText, /"ANTHROPIC_BASE_URL": "https:\/\/open\.bigmodel\.cn\/api\/anthropic"/);
+  assert.match(glmPreset.configText, /"ANTHROPIC_DEFAULT_OPUS_MODEL": "GLM-5\.1"/);
+  assert.match(glmPreset.configText, /"ANTHROPIC_DEFAULT_SONNET_MODEL": "GLM-5\.1"/);
+  assert.match(glmPreset.configText, /"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"/);
+  assert.match(glmPreset.configText, /"model": "opus\[1m\]"/);
+  assert.match(glmPreset.authText, /"hasCompletedOnboarding": true/);
+  assert.equal(openRouterPreset.productId, 'claude');
+  assert.match(openRouterPreset.configText, /"OPENROUTER_API_KEY": "sk-or-v1-/);
+  assert.match(openRouterPreset.configText, /"ANTHROPIC_BASE_URL": "https:\/\/openrouter\.ai\/api"/);
+  assert.match(openRouterPreset.configText, /"ANTHROPIC_MODEL": "qwen\/qwen3\.6-plus:free"/);
+  assert.match(openRouterPreset.configText, /"CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"/);
+  assert.match(openRouterPreset.authText, /"hasCompletedOnboarding": true/);
 });

@@ -195,6 +195,47 @@ test('saveCustomPreset keeps Claude custom presets scoped away from Codex preset
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
+test('mergePresetsWithOverrides suppresses custom presets once the same product/id becomes built-in', () => {
+  assert.equal(typeof overridesStore.mergePresetsWithOverrides, 'function');
+
+  const merged = overridesStore.mergePresetsWithOverrides(
+    [
+      {
+        id: 'claude-openrouter-qwen3-6-plus-free',
+        productId: 'claude',
+        name: 'OpenRouter Built-In',
+        configText: '{\n  "env": {}\n}\n',
+        authText: '{\n  "hasCompletedOnboarding": true\n}\n',
+        isBuiltIn: true
+      }
+    ],
+    {
+      overrides: {},
+      customPresets: [
+        {
+          id: 'claude-openrouter-qwen3-6-plus-free',
+          productId: 'claude',
+          name: 'OpenRouter Custom Legacy',
+          configText: '{\n  "env": {}\n}\n',
+          authText: '{\n  "hasCompletedOnboarding": true\n}\n'
+        },
+        {
+          id: 'claude-custom',
+          productId: 'claude',
+          name: 'Claude Custom',
+          configText: '{\n  "env": {}\n}\n',
+          authText: '{\n  "hasCompletedOnboarding": true\n}\n'
+        }
+      ]
+    }
+  );
+
+  assert.deepEqual(
+    merged.map((preset) => preset.id),
+    ['claude-openrouter-qwen3-6-plus-free', 'claude-custom']
+  );
+});
+
 test('createCustomPresetId slugifies names and avoids collisions with existing ids', () => {
   assert.equal(typeof overridesStore.createCustomPresetId, 'function');
 

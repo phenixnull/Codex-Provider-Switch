@@ -159,6 +159,9 @@ function mergePresetsWithOverrides(presets, storeOrOverrides) {
   const targetProductIds = new Set(
     presets.map((preset) => preset.productId).filter((productId) => !!productId)
   );
+  const builtInPresetKeys = new Set(
+    presets.map((preset) => `${preset.productId || 'codex'}:${preset.id}`)
+  );
   const mergedBuiltIns = presets.map((preset) => {
     const override = store.overrides[preset.id];
     const overrideProductId = override?.productId || 'codex';
@@ -186,11 +189,13 @@ function mergePresetsWithOverrides(presets, storeOrOverrides) {
     ...mergedBuiltIns,
     ...store.customPresets
       .filter((preset) => {
+        const productId = preset.productId || 'codex';
+
         if (targetProductIds.size === 0) {
-          return true;
+          return !builtInPresetKeys.has(`${productId}:${preset.id}`);
         }
 
-        return targetProductIds.has(preset.productId || 'codex');
+        return targetProductIds.has(productId) && !builtInPresetKeys.has(`${productId}:${preset.id}`);
       })
       .map((preset) => ({
         ...preset,

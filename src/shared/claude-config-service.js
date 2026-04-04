@@ -16,6 +16,20 @@ function formatJsonText(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+function extractClaudeEnv(settingsText) {
+  const settings = parseJsonObjectSafe(settingsText);
+  return settings.env && typeof settings.env === 'object' ? settings.env : {};
+}
+
+function resolveClaudeModel(env) {
+  return (
+    String(env.ANTHROPIC_MODEL || '').trim() ||
+    String(env.ANTHROPIC_DEFAULT_OPUS_MODEL || '').trim() ||
+    String(env.ANTHROPIC_DEFAULT_SONNET_MODEL || '').trim() ||
+    String(env.ANTHROPIC_DEFAULT_HAIKU_MODEL || '').trim()
+  );
+}
+
 function maskToken(token) {
   if (!token) {
     return '';
@@ -29,9 +43,9 @@ function maskToken(token) {
 }
 
 function detectActiveClaudePresetId(settingsText) {
-  const settings = parseJsonObjectSafe(settingsText);
-  const env = settings.env && typeof settings.env === 'object' ? settings.env : {};
+  const env = extractClaudeEnv(settingsText);
   const baseUrl = String(env.ANTHROPIC_BASE_URL || '').toLowerCase();
+  const model = resolveClaudeModel(env);
   const opusModel = String(env.ANTHROPIC_DEFAULT_OPUS_MODEL || '').trim();
   const sonnetModel = String(env.ANTHROPIC_DEFAULT_SONNET_MODEL || '').trim();
 
@@ -41,6 +55,10 @@ function detectActiveClaudePresetId(settingsText) {
     sonnetModel === 'GLM-5.1'
   ) {
     return 'claude-glm-5-1';
+  }
+
+  if (baseUrl.includes('openrouter.ai/api') && model === 'qwen/qwen3.6-plus:free') {
+    return 'claude-openrouter-qwen3-6-plus-free';
   }
 
   return 'custom';
@@ -75,16 +93,12 @@ function mergeClaudeStatePatch({ existingStateText, patchText }) {
 }
 
 function summarizeClaudeState({ settingsText }) {
-  const settings = parseJsonObjectSafe(settingsText);
-  const env = settings.env && typeof settings.env === 'object' ? settings.env : {};
+  const env = extractClaudeEnv(settingsText);
 
   return {
     providerId: detectActiveClaudePresetId(settingsText),
-    model:
-      String(env.ANTHROPIC_DEFAULT_OPUS_MODEL || '').trim() ||
-      String(env.ANTHROPIC_DEFAULT_SONNET_MODEL || '').trim() ||
-      String(env.ANTHROPIC_DEFAULT_HAIKU_MODEL || '').trim(),
-    maskedKey: maskToken(String(env.ANTHROPIC_AUTH_TOKEN || '').trim())
+    model: resolveClaudeModel(env),
+    maskedKey: maskToken(String(env.OPENROUTER_API_KEY || env.ANTHROPIC_AUTH_TOKEN || '').trim())
   };
 }
 

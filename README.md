@@ -8,7 +8,7 @@
     <img src="https://img.shields.io/badge/Electron-41.1.0-191970?style=for-the-badge&logo=electron&logoColor=white" alt="Electron 41.1.0" />
     <img src="https://img.shields.io/badge/Node.js-Desktop_App-1F9D55?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js desktop app" />
     <img src="https://img.shields.io/badge/Products-Codex%20%7C%20Claude-FF7A59?style=for-the-badge" alt="Supported products" />
-    <img src="https://img.shields.io/badge/Tests-108%20passing-0F766E?style=for-the-badge" alt="108 passing tests" />
+    <img src="https://img.shields.io/badge/Tests-111%20passing-0F766E?style=for-the-badge" alt="111 passing tests" />
   </p>
 
   <p>
@@ -49,7 +49,7 @@
 | 现有预设可编辑 | 包括内置预设，也支持修改名称、描述、配置内容和密钥后再保存 |
 | 目标文件可追踪 | 清楚展示当前生效文件路径，方便你确认真正写到了哪里 |
 | Claude 额度能力 | Claude 侧支持查看官方额度页面，GLM-5.1 卡片支持抓取 BigModel `每5小时使用额度` 与 `MCP 每月额度` |
-| OpenRouter Claude 预设 | 支持保存自定义 Claude 预设，例如 `qwen/qwen3.6-plus:free`，并在卡片中展示简化额度说明 |
+| OpenRouter Claude 预设 | 内置 `qwen/qwen3.6-plus:free` 的 Claude/OpenRouter 预设，并在卡片中展示简化额度说明 |
 | Windows 兼容回退 | 针对部分网关拦截 Node/Electron `fetch` 的场景，在线测试可在 Windows 下自动回退到 PowerShell 请求 |
 
 ## 当前工作流
@@ -78,8 +78,9 @@
 | 预设 | 目标文件 | 接口基址 | 备注 |
 | --- | --- | --- | --- |
 | `GLM-5.1 (Claude Code)` | `~/.claude/settings.json` + `.claude.json patch` | `https://open.bigmodel.cn/api/anthropic` | BigModel Anthropic 兼容端点，内置官方额度抓取 |
+| `OpenRouter Qwen3.6 Plus Free (Claude Code)` | `~/.claude/settings.json` + `.claude.json patch` | `https://openrouter.ai/api` | OpenRouter Anthropic 兼容端点，内置 `qwen/qwen3.6-plus:free` 与 80% auto compact |
 
-另外，Claude 产品页也支持保存自定义预设。当前 README 展示图里展示的就是一个本地保存的 OpenRouter Claude 预设：`OpenRouter Qwen3.6 Plus Free (Claude Code)`。
+Claude 产品页仍然支持保存其他自定义预设；当前 README 展示图里展示的 OpenRouter Claude 卡片现在也已经是仓库内置预设的一部分。
 
 说明：
 
